@@ -22,6 +22,7 @@ class FeedContainer <T extends CopyCat<T>> {
         container = new HashMap<>();
     }
     void update(int id, T value) {
+        System.out.println("Copied successfully!");
         if (container.containsKey(id)) {
             Objects.requireNonNull(container.get(id)).copy(value);
         } else {
@@ -260,7 +261,6 @@ public class Logic {
     public static class Order extends CopyCat<Order> {
         static FeedContainer<Order> container = new FeedContainer<>();
 
-        private Integer id;
         private Client client;
         private Executor executor;
         private DateFormat date;
