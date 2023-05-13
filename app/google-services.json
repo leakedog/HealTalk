@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "905761098408",
+    "project_id": "healtalk-7ab6c",
+    "storage_bucket": "healtalk-7ab6c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:905761098408:android:0ca6fe5e318f60f150909d",
+        "android_client_info": {
+          "package_name": "com.example.firstprojecttry"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "905761098408-n81o0nm5j06edhshevhgj073ve8jsm91.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdtaZqUzGiMzGSZZYCy6Fb419H_CCxN2Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "905761098408-n81o0nm5j06edhshevhgj073ve8jsm91.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
