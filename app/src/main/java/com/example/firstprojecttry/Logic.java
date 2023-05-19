@@ -38,7 +38,30 @@ class FeedContainer <T extends CopyCat<T>> {
 }
 
 public class Logic {
+    public static class Location{
+        private Double lat, lng;
 
+        public void setLat(Double lat) {
+            this.lat = lat;
+        }
+
+        public void setLng(Double lng) {
+            this.lng = lng;
+        }
+
+        public Location(Double lat, Double lng) {
+            this.lat = lat;
+            this.lng = lng;
+        }
+
+        public Double getLat() {
+            return lat;
+        }
+
+        public Double getLng() {
+            return lng;
+        }
+    }
     public static class Client extends CopyCat<Client>{
         protected static FeedContainer<Client> container = new FeedContainer<>();
         private String name;
@@ -154,12 +177,11 @@ public class Logic {
         private Photo photo;
         private Rating rating;
         private Side preferredSide;
-        private String location;
+        private Location location;
         Executor() {
             description = new Description();
             price = 0;
             preferredSide = Side.BOTH;
-            location = "";
             photo = new Photo();
             rating = calculate(this);
             id = container.getSize();
@@ -168,7 +190,7 @@ public class Logic {
             schedule = new Schedule();
         }
 
-        Executor(Integer id, String name, Description description, Schedule schedule, Integer price, Photo photo, Side preferredSide, String location) {
+        Executor(Integer id, String name, Description description, Schedule schedule, Integer price, Photo photo, Side preferredSide, Location location) {
             this.name = name;
             this.id = id;
             this.description = description;
@@ -223,7 +245,7 @@ public class Logic {
             this.preferredSide = preferredSide;
         }
 
-        public void setLocation(String location) {
+        public void setLocation(Location location) {
             this.location = location;
         }
         public String getName() {return name; }
@@ -248,7 +270,7 @@ public class Logic {
             return schedule;
         }
 
-        public String getLocation() {
+        public Location getLocation() {
             return location;
         }
 
