@@ -126,7 +126,6 @@ fun ScreenProfile() {
     var imageUriState = remember{mutableStateOf<Uri?> (null)}
     val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         imageUriState.value = uri
-        ServerLogic.Login()
         ServerLogic.uploadImage(imageUriState)
     }
 
@@ -531,8 +530,7 @@ fun PreviewProfilePage() {
         4,
         "Elizabeth Mitchi",
 
-        Logic.Description("I am a college graduate from SUNY Cortland. I have a degree in Sociology and Spanish, with a minor in Latin American Studies. I am in the process of pursuing a Masters in Social Work. I am also a Spanish tutor."
-        ),
+        Logic.Description(),
         Logic.Schedule(),
         30,
         Logic.Photo(),

@@ -6,6 +6,7 @@ import static com.example.firstprojecttry.Logic.calculate;
 
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.compose.runtime.MutableState;
@@ -43,6 +44,7 @@ public class ServerLogic {
     public static DatabaseReference orderBase;
     public static Integer maskLoaded = 0;
     public static Boolean Loaded = false;
+    public static FirebaseAuth mAuth = null;
     static {
         mDatabase = FirebaseDatabase.getInstance("https://healtalk-7ab6c-default-rtdb.europe-west1.firebasedatabase.app/").getReference();
         clientsBase = FirebaseDatabase.getInstance("https://healtalk-7ab6c-default-rtdb.europe-west1.firebasedatabase.app/").getReference("users/clients/");
@@ -51,6 +53,7 @@ public class ServerLogic {
         clientsBase.addValueEventListener(produceClientEventListener());
         executorsBase.addValueEventListener(produceExecutorEventListener());
         orderBase.addValueEventListener(produceOrderEventListener());
+        mAuth = FirebaseAuth.getInstance();
     }
     protected static void addClient(Client person) {
         mDatabase.child("users").child("clients").child(person.getId().toString()).setValue(person).addOnCompleteListener(insertionReaction("Client")).addOnFailureListener(failureReaction("Client"));
@@ -216,56 +219,7 @@ public class ServerLogic {
 
     }
 
-    public static void Login() {
-        // Assuming you're using Firebase Authentication
 
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-
-        // Check if the user is already signed in
-        FirebaseUser currentUser = auth.getCurrentUser();
-        System.out.println(currentUser);
-        if (currentUser == null) {
-            // User is not signed in, authenticate the user
-            auth.signInWithEmailAndPassword("user@example.com", "password")
-                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                // Sign-in success, continue with getting the token
-                                // Retrieve the user's token as needed
-                                getCurrentUserToken();
-                            } else {
-                                // Sign-in failed, handle the error
-                                Exception exception = task.getException();
-                                // Handle the exception accordingly
-                            }
-                        }
-                    });
-        } else {
-            // User is already signed in, proceed with getting the token
-            getCurrentUserToken();
-        }
-    }
-    // Method to retrieve the user's token
-    private static void getCurrentUserToken() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            currentUser.getIdToken(true)
-                    .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<GetTokenResult> task) {
-                            if (task.isSuccessful()) {
-                                String token = task.getResult().getToken();
-                                // Use the token as needed
-                            } else {
-                                // Token retrieval failed, handle the error
-                                Exception exception = task.getException();
-                                // Handle the exception accordingly
-                            }
-                        }
-                    });
-        }
-    }
 
 }
 

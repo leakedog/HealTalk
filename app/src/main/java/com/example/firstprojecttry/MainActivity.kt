@@ -534,7 +534,7 @@ fun ExecutorCardInfo(executor: Executor) {
                     theme = MaterialTheme
                 )
                 Text(
-                    text = executor.description.text,
+                    text = "executor.description.text",
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(start = 14.dp)
