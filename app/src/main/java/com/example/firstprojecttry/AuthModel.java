@@ -16,57 +16,57 @@ import com.google.firebase.auth.FirebaseUser;
 public class AuthModel {
     public static FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-    void showGreeting() {
-        AuthViewModel.showGreeting();
-    }
-    void showLogin() {
-        AuthViewModel.showLogin();
-    }
-    void showRegistration() {
-        AuthViewModel.showRegistration();
-    }
-    public static void login(String email, String password, Boolean error) {
+    public static void login(String email, String password, MutableState<Boolean> error) {
         // Assuming you're using Firebase Authentication
 
         // Check if the user is already signed in
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        System.out.println(currentUser);
         if (currentUser == null) {
-            // User is not signed in, authenticate the user
-            mAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            // Sign-in success, continue with getting the token
-                            // Retrieve the user's token as needed
-                            AuthViewModel.handleSuccessfulLogin();
-                        } else {
-                            // Sign-in failed, handle the error
-                            Exception exception = task.getException();
-                            Log.w(TAG, "signInWithEmailAndPassword:failure", task.getException());
-                            // Handle the exception accordingly
-                            AuthViewModel.handleErrorLogin(error);
-                        }
-                    });
+            try {
+                // User is not signed in, authenticate the user
+                mAuth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                // Sign-in success, continue with getting the token
+                                // Retrieve the user's token as needed
+                                AuthViewModel.handleSuccessfulLogin();
+                            } else {
+                                // Sign-in failed, handle the error
+                                Exception exception = task.getException();
+                                Log.w(TAG, "signInWithEmailAndPassword:failure", task.getException());
+                                // Handle the exception accordingly
+                                AuthViewModel.handleErrorLogin(error);
+                            }
+                        });
+            } catch (Exception exception) {
+                Log.w(TAG, "signInWithEmailAndPassword:failure", exception);
+                AuthViewModel.handleErrorLogin(error);
+            }
         } else {
             // User is already signed in, proceed with getting the token
             AuthViewModel.handleSuccessfulLogin();
         }
     }
     public static void register(String email, String password, MutableState<Boolean> error) {
-        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener( new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    // Sign in success, update UI with the signed-in user's information
-                    Log.d(TAG, "createUserWithEmail:success");
-                    AuthViewModel.handleSuccessfulRegistration();
-                } else {
-                    // If sign in fails, display a message to the user.
-                    Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                    AuthViewModel.handleErrorRegistration(error);
+        try {
+            mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "createUserWithEmail:success");
+                        AuthViewModel.handleSuccessfulRegistration();
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                        AuthViewModel.handleErrorRegistration(error);
+                    }
                 }
-            }
-        });
+            });
+        } catch (Exception e) {
+            Log.w(TAG, "createUserWithEmail:failure", e);
+            AuthViewModel.handleErrorLogin(error);
+        }
     }
     // Method to retrieve the user's token
     public static void getCurrentUserToken(MutableState<Boolean> error) {
@@ -91,5 +91,14 @@ public class AuthModel {
             System.out.println("Error");
 
         }
+    }
+    public static void startApplication() {
+        AuthViewModel.showLoading();
+        if (mAuth.getCurrentUser() != null) {
+            getCurrentUserToken(null);
+        } else {
+            AuthViewModel.showGreeting();
+        }
+
     }
 }

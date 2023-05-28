@@ -50,6 +50,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -114,6 +115,8 @@ import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -210,7 +213,7 @@ fun GreetingScreen(navController: NavController) {
 
 @Composable
 fun LoginScreen(navController: NavController) {
-    var erorr by rememberSaveable { mutableStateOf(false) }
+    var erorr = remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize()
         .background(Color.White)) {
         IconButton(
@@ -251,34 +254,37 @@ fun LoginScreen(navController: NavController) {
                 value = email,
                 onValueChange = {
                     email = it
-                    erorr = false
+                    erorr.value = false
                 },
                 label = { Text("Email") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 50.dp),
                 supportingText = {
-                    if (erorr) {
+                    if (erorr.value) {
                         Text("Wrong email")
                     }
-                }
+                },
+                isError = erorr.value
             )
             OutlinedTextField(
                 value = password,
                 onValueChange = {
                     password = it
-                    erorr = false;
+                    erorr.value = false
                 },
                 label = { Text("Password", color = Color.DarkGray) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 50.dp),
-                isError = erorr,
+                isError = erorr.value,
                 supportingText = {
-                    if (erorr) {
-                        Text("or password")
+                    if (erorr.value) {
+                        Text("Or wrong password")
                     }
-                }
+                },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
             Button(
                 onClick = {
@@ -341,7 +347,7 @@ fun LoginScreen(navController: NavController) {
 }
 @Composable
 fun SignUpScreen(navController: NavController) {
-    var erorr by rememberSaveable { mutableStateOf(false) }
+    var erorr = remember { mutableStateOf(false) }
     Column(
         Modifier
             .fillMaxSize()
@@ -386,11 +392,18 @@ fun SignUpScreen(navController: NavController) {
                 value = email,
                 onValueChange = {
                     email = it
+                    erorr.value = false
                 },
                 label = { Text("Email") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 50.dp)
+                    .padding(top = 50.dp),
+                isError = erorr.value,
+                supportingText = {
+                    if (erorr.value) {
+                        Text("Incorrect email")
+                    }
+                }
             )
             OutlinedTextField(
                 value = password,
@@ -398,13 +411,16 @@ fun SignUpScreen(navController: NavController) {
                     password = it
                 },
                 label = { Text("Password", color = Color.DarkGray) },
+                isError = erorr.value,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 50.dp)
+                    .padding(top = 50.dp),
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
             Button(
                 onClick = {
-
+                    AuthViewModel.tryRegister(email, password, erorr)
                 },
                 modifier = Modifier.padding(top = 60.dp).width(220.dp)
             ) {

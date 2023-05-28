@@ -15,6 +15,9 @@ public class AuthViewModel {
     static void showRegistration() {
         navController.navigate("registration");
     }
+    static void showLoading() {
+        navController.navigate("loading");
+    }
 
     public static void handleTokenError(MutableState<Boolean> error) {
         if (error != null) {
@@ -29,11 +32,10 @@ public class AuthViewModel {
 
     public static void handleSuccessfulRegistration() {
         navController.navigate("loading");
-        MutableState<Boolean> error = null;
-        AuthModel.getCurrentUserToken(error);
+        AuthModel.getCurrentUserToken(null);
     }
 
-    static void tryLogin(String email, String password, Boolean error) {
+    static void tryLogin(String email, String password, MutableState<Boolean> error) {
         AuthModel.login(email, password, error);
     }
 
@@ -43,19 +45,21 @@ public class AuthViewModel {
 
     public static void handleSuccessfulLogin() {
         navController.navigate("loading");
-        MutableState<Boolean> error = null;
-        AuthModel.getCurrentUserToken(error);
+        AuthModel.getCurrentUserToken(null);
     }
 
-    public static void handleErrorLogin(Boolean error) {
-        error = true;
+    public static void handleErrorLogin(MutableState<Boolean> error) {
+        error.setValue(true);
     }
 
     public static void handleToken(String realToken) {
         token = realToken;
+        System.out.println("Token: " + realToken);
         navController.navigate("loggedApp");
     }
-    public static void startApplication() {
-        
+
+
+    public static void handleComeBackFromError() {
+        showGreeting();
     }
 }

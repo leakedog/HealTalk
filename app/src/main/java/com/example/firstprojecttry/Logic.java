@@ -1,12 +1,24 @@
 package com.example.firstprojecttry;
 
+import static androidx.compose.runtime.SnapshotStateKt.mutableStateOf;
+
+import androidx.compose.runtime.MutableState;
+
+import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.*;
 
 
 abstract class CopyCat<T> {
+    protected String token;
+    public String getToken(){
 
+        return token;
+    }
+    public void setToken(){
+        this.token = token;
+    }
     protected int id;
     abstract void copy(T o);
     public void setId(int id) {
@@ -84,7 +96,7 @@ public class Logic {
             container.update(id, this);
         }
 
-        Client(String Name, Description description, Integer childrenNumber, Side preferredSide, String location) {
+        Client(String Name, Description description, Integer childrenNumber, Side preferredSide, String location, String token) {
             this.name = Name;
             this.description = description;
             this.childrenNumber = childrenNumber;
@@ -92,6 +104,7 @@ public class Logic {
             this.location = location;
             this.rating = calculate(this);
             this.id = container.getSize();
+            this.token = token;
             container.update(this.id, this);
         }
 
@@ -203,6 +216,7 @@ public class Logic {
             this.rating = calculate(this);
             this.id = container.getSize();
             container.update(this.id, this);
+            System.out.println(description);
         }
 
         @Override
@@ -299,6 +313,7 @@ public class Logic {
             this.date = date;
             this.customerExperience = customerExperience;
             this.executorExperience = executorExperience;
+
             id = container.getSize();
             container.update(id, this);
         }
@@ -382,7 +397,9 @@ public class Logic {
             numberOfOrders = cnt;
         }
 
+
     }
+
     static Rating calculate(Object element){
 
         try {
@@ -430,8 +447,14 @@ public class Logic {
     public static class Description {
         public String aboutYou;
         public Timestamp dateBirth;
-        public Integer childNumber = null;
-
+        public Integer childNumber;
+        public String sex;
+        Description() {
+            sex = new String("Male");
+            childNumber = 0;
+            aboutYou = new String("");
+            dateBirth = new Timestamp(0);
+        }
 
     }
     public static class Photo {
@@ -485,9 +508,76 @@ public class Logic {
             this.shouldBeExtended = (restrictionValue >= 100);
             this.changeable = changeable;
         }
+        public static Object getObject(String name, Executor executor) {
+            try {
+                var field = Logic.Executor.class.getDeclaredField(name);
+                field.setAccessible(true);
+                return executor;
+            } catch (Exception error) {
+                try {
+                    var field = Logic.Description.class.getDeclaredField(name);
+                    field.setAccessible(true);
+                    return executor.description;
+                } catch (Exception error1) {
+                    try {
+                        var field = Logic.Photo.class.getDeclaredField(name);
+                        field.setAccessible(true);
+                        return executor.photo;
+                    } catch (Exception error2) {
+                        System.out.println("Exception in uploadExecutor: " + error2.getMessage());
+                    }
+                }
+            }
+            return null;
+        }
+        public static Field getField(String name, Executor executor) {
+            try {
+                var field = Logic.Executor.class.getDeclaredField(name);
+                field.setAccessible(true);
+                return field;
+            } catch (Exception error) {
+                try {
+                    var field = Logic.Description.class.getDeclaredField(name);
+                    field.setAccessible(true);
+                    return field;
+                } catch (Exception error1) {
+                    try {
+                        var field = Logic.Photo.class.getDeclaredField(name);
+                        field.setAccessible(true);
+                        return field;
+                    } catch (Exception error2) {
+                        System.out.println("Exception in uploadExecutor: " + error2.getMessage());
+                    }
+                }
+            }
+            return null;
+        }
+        public static String getFieldValue(String name, Executor executor) {
+            try {
+                var field = Logic.Executor.class.getDeclaredField(name);
+                field.setAccessible(true);
+                return (String)field.get(executor);
+            } catch (Exception error) {
+                try {
+                    var field = Logic.Description.class.getDeclaredField(name);
+                    field.setAccessible(true);
+                    return (String)field.get(executor.getDescription());
+                } catch (Exception error1) {
+                    try {
+                        var field = Logic.Photo.class.getDeclaredField(name);
+                        field.setAccessible(true);
+                        return (String)field.get(executor.getPhoto());
+                    } catch (Exception error2) {
+                        System.out.println("Exception in uploadExecutor: " + error2.getMessage() + " " + name);
+                    }
+                }
+            }
+            return null;
+        }
     }
 
-    static Map<String, DescriptionCharacteristicField> descriptionMap = new HashMap<>();
+    public static Map<String, DescriptionCharacteristicField> descriptionMap = new HashMap<>();
+    public static Map<String, MutableState<String>> descriptionStates = new HashMap<>();
 
     static{
         descriptionMap.put("name",
@@ -514,6 +604,7 @@ public class Logic {
                 new DescriptionCharacteristicField("Choose your photo",
                         "By providing your photo, we can create a more personalized and engaging experience tailored specifically to you. Also that enables other users to identify you more easily. This fosters a sense of community and encourages meaningful interactions among our users.",
                         "Your photo:", 0, false));
+
 
     }
 

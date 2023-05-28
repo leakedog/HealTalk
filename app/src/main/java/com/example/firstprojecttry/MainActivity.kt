@@ -5,67 +5,43 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
-import android.view.ViewTreeObserver
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.*
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.example.firstprojecttry.Logic.Executor
-import com.example.firstprojecttry.ui.theme.FirstProjectTryTheme
+import com.example.firstprojecttry.Logic.*
+import com.example.firstprojecttry.uploadModel.addClient
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -79,152 +55,14 @@ class rl : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent{
+
+
             LoadingBlock()
-        }
+           }
         /*
         setContent {
             // A surface container using the 'background' color from the theme
-            FirstProjectTryTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
 
-                    val center = LatLng(50.0614285,19.9209253)
-                    val centerState = MarkerState(position = center)
-                    val cameraPositionState = rememberCameraPositionState{
-                        position = CameraPosition.fromLatLngZoom(center, 17f)
-                    }
-                    Box {
-                        var showId by remember {mutableStateOf(Executor())}
-                        /*showId =         Logic.Executor(
-                            2,
-                            "Maria Leverbook",
-                            Logic.Description("I have over 14 years of experience working as a nanny, I love and enjoy to work as a Baby care giver, part of my duties are; prepare their food, change diapers, get them ready for naps, entertainment for the kids, teaching them to sit up, crawl and walk, I also socialize them by taking them to the parks to play or have a play date, I'll read books to them, teach Spanish with the parents approval, I change beds, do laundry for the babies. I also clean whatever I use in the kitchen after I prepare food for the babies. My first job as a nanny was in New York, I was taking care of twins babies girls. Then I moved to Georgia 13 years ago, during those years I was a care giver for babies in different families. Recently we moved to Menifee, CA on February Due to my husband's job in Aviation, he was transferred to California permanently, reference are available upon request."),
-                            Logic.Schedule(),
-                            22,
-                            Logic.Photo(),
-                            Logic.Side.CLIENTHOME,
-                            "Poland, Krakow, ul. Huka 3"
-                        )*/
-                        var showExecutor = remember {mutableStateOf(false)}
-                        val displayCard = {a: Executor -> showId = a
-                                                            showExecutor.value = true
-                                                                        Unit}
-                        var showMessages = remember{mutableStateOf(false)}
-
-
-
-                        GoogleMap(
-                            modifier = Modifier.fillMaxSize(),
-                            cameraPositionState = cameraPositionState
-                        ) {
-
-                            var sample = listOf<LatLng>(LatLng(50.0600659,19.921837), LatLng(50.059785, 19.923739), LatLng(50.0614285,19.9209253), LatLng(50.0597667,19.9201786), LatLng(50.065081, 19.923790), LatLng(50.058137, 19.924342), LatLng(50.061567, 19.926101))
-
-                            val executors = listOf<Executor>(
-                                Logic.Executor(
-                                    4,
-                                    "Elizabeth Mitchi",
-                                    Logic.Description("I am a college graduate from SUNY Cortland. I have a degree in Sociology and Spanish, with a minor in Latin American Studies. I am in the process of pursuing a Masters in Social Work. I am also a Spanish tutor."
-                                    ),
-                                    Logic.Schedule(),
-                                    30,
-                                    Logic.Photo(),
-                                    Logic.Side.EXECUTORHOME,
-                                    Logic.Location(50.0600659,19.921837)
-                                ),
-                                Logic.Executor(
-                                    3,
-                                    "Tiffany Villet",
-                                    Logic.Description("Hello. My name is Alan and I am 29 years old. I am an organized, clean, easygoing, loving, patient and fun person. I am a strong driver with a reliable car, non-smoker, fully vaccinated (Covid, Tdap and Flu), CPR certified and pet friendly. I have a teaching degree in Brazil to be a teacher of Portuguese and English and right after college I got a lot of experience as a tutor"),
-                                    Logic.Schedule(),
-                                    19,
-                                    Logic.Photo(),
-                                    Logic.Side.BOTH,
-                                    Logic.Location(50.059785, 19.923739)
-                                ),
-                                Logic.Executor(
-                                    2,
-                                    "Maria Leverbook",
-                                    Logic.Description("I have over 14 years of experience working as a nanny, I love and enjoy to work as a Baby care giver, part of my duties are; prepare their food, change diapers, get them ready for naps, entertainment for the kids, teaching them to sit up, crawl and walk, I also socialize them by taking them to the parks to play or have a play date, I'll read books to them, teach Spanish with the parents approval"),
-                                    Logic.Schedule(),
-                                    22,
-                                    Logic.Photo(),
-                                    Logic.Side.CLIENTHOME,
-                                    Logic.Location(50.0614285, 19.9209253)
-                                ),
-                                Logic.Executor(
-                                    4,
-                                    "Elizabeth Mitchi",
-                                    Logic.Description("I am a college graduate from SUNY Cortland. I have a degree in Sociology and Spanish, with a minor in Latin American Studies. I am in the process of pursuing a Masters in Social Work. I am also a Spanish tutor."
-                                    ),
-                                    Logic.Schedule(),
-                                    30,
-                                    Logic.Photo(),
-                                    Logic.Side.EXECUTORHOME,
-                                    Logic.Location(50.065081, 19.923790)
-                                ), Logic.Executor(
-                                    3,
-                                    "Tiffany Villet",
-                                    Logic.Description("Hello. My name is Alan and I am 29 years old. I am an organized, clean, easygoing, loving, patient and fun person. I am a strong driver with a reliable car, non-smoker, fully vaccinated (Covid, Tdap and Flu), CPR certified and pet friendly. I have a teaching degree in Brazil to be a teacher of Portuguese and English and right after college I got a lot of experience as a tutor"),
-                                    Logic.Schedule(),
-                                    19,
-                                    Logic.Photo(),
-                                    Logic.Side.BOTH,
-                                    Logic.Location(50.058137, 19.924342)
-                                ), Logic.Executor(
-                                    2,
-                                    "Maria Leverbook",
-                                    Logic.Description("I have over 14 years of experience working as a nanny, I love and enjoy to work as a Baby care giver, part of my duties are; prepare their food, change diapers, get them ready for naps, entertainment for the kids, teaching them to sit up, crawl and walk, I also socialize them by taking them to the parks to play or have a play date, I'll read books to them, teach Spanish with the parents approval"),
-                                    Logic.Schedule(),
-                                    22,
-                                    Logic.Photo(),
-                                    Logic.Side.CLIENTHOME,
-                                    Logic.Location(50.061567, 19.926101)
-                                )
-
-
-                            )
-
-                            DisplayAllMarkers(executors, displayCard)
-
-                            /*
-                        Marker(
-                            state = singaporeState,
-                            title = "Marker in Singapore"
-                        )*/
-                        }
-                        if(showMessages.value == true){
-                            Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
-                                Conversation(SampleData.conversationSample)
-                            }
-                        }
-                        Column(
-                            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-                            verticalArrangement = Arrangement.Bottom,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Button(onClick = {
-                                             showMessages.value = !showMessages.value
-                            }, modifier = Modifier.padding(20.dp).height(50.dp).width(300.dp))
-                            { Text("Message") }
-                        }
-                        //modifier = Modifier.size(10.dp).background(Color.White)
-                        if(showExecutor.value == true){
-                            Log.d("showExecutor", "true")
-                            ExecutorCard(executor = showId, showExecutor)
-                        // Text("Hello", style = TextStyle(fontSize = 50.sp))
-                        }else{
-                            Log.d("showExecutor", "false");
-                        }
-
-                    }
-
-                    //ExecutorCard(executor = Logic.Executor(0, "Bogdan", Logic.Description(), Logic.Schedule(), 20, Logic.Photo(), Logic.Side.BOTH, "Krakow"))
-
-                }
-            }
         }
 
          */
@@ -365,7 +203,7 @@ fun DisplayAllMarkers(marks: List<Executor>, updateStatus: (Executor) -> Unit){
     }
 }
 
-
+/*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExecutorCard(executor: Executor, visible: MutableState<Boolean>) {
@@ -429,7 +267,7 @@ fun ExecutorCard(executor: Executor, visible: MutableState<Boolean>) {
     }
 }
 
-
+*/
 @Composable
 fun createTitleLargeText(text: String, paddingValues: PaddingValues, theme: MaterialTheme) {
     Text(
@@ -470,7 +308,7 @@ fun createProgressBar(value: Float, outOf: Float, color: Color) {
     )
 }
 
-
+/*
 @Composable
 fun ExecutorCardInfo(executor: Executor) {
     FirstProjectTryTheme {
@@ -740,3 +578,4 @@ fun PreviewConversation() {
         Conversation(SampleData.conversationSample)
     }
 }*/
+        */

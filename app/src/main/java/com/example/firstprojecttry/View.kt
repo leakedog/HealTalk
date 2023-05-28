@@ -1,7 +1,9 @@
 package com.example.firstprojecttry
 
+import android.content.ContentValues.TAG
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -38,8 +40,44 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            /*
+            uploadModel.addClient(
+                Logic.Client(
+                    "DOESNT.. PAY OFF",
+                    Logic.Description(),
+                    1,
+                    Logic.Side.EXECUTORHOME,
+                    "fuk",
+                    "35138517"
+                )
+            );
+            uploadModel.addClient(
+                Logic.Client(
+                    "HardWORK",
+                    Logic.Description(),
+                    1,
+                    Logic.Side.EXECUTORHOME,
+                    "fuk",
+                    "857192538.13512"
+                )
+            );
+            uploadModel.addClient(
+                Logic.Client(
+                    "Vasya",
+                    Logic.Description(),
+                    1,
+                    Logic.Side.EXECUTORHOME,
+                    "fuk",
+                    "97518.325"
+                )
+            );
+
+            */
             val navController = rememberNavController()
+            AuthViewModel.navController = navController;
+            ProfileViewModel.navController = navController;
             MyApp(navController)
+            AuthModel.startApplication()
         }
     }
 }
@@ -47,7 +85,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MyApp(navController: NavHostController) {
-    AuthViewModel.navController = navController;
     NavHost(navController, startDestination = "start") {
         composable("error") {
             ErrorScreen()
@@ -67,9 +104,9 @@ fun MyApp(navController: NavHostController) {
             }
            
         }
-        navigation(startDestination = "maps", route = "loggedApp") {
-            composable("maps") {
-                Screen4(navController)
+        navigation(startDestination = "profile", route = "loggedApp") {
+            composable("profile") {
+                PreviewProfilePage()
             }
 
         }
@@ -85,7 +122,6 @@ fun Screen1(navController: NavController) {
 
 @Composable
 fun Screen2(navController: NavController, Loading: MutableState<Boolean>) {
-    ServerLogic.navController = navController;
     if (Loading.value) {
         Loading.value = false;
         navController.navigate("screen1");

@@ -158,7 +158,35 @@ fun ErrorScreen() {
             }
             Button(
                 onClick = {
-                    AuthViewModel.showGreeting()
+                    AuthViewModel.handleComeBackFromError()
+                },
+                modifier = Modifier.padding(top = 50.dp)
+            ){
+                Text("Try again", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ErrorImageScreen() {
+    Column(Modifier.fillMaxSize().background(Color.White)) {
+        Column(Modifier.padding(start = 20.dp, end = 20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Image(
+                painter = painterResource(id = R.drawable.error),
+                contentDescription = "Error Image UI",
+                modifier = Modifier.fillMaxWidth().padding(top = 100.dp),
+                contentScale = ContentScale.FillWidth,
+
+                )
+            Text("We're sorry", modifier = Modifier.padding(start = 20.dp).fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge, color = Color.Black)
+            Column(Modifier.padding(start = 40.dp, end = 40.dp, top = 20.dp).fillMaxWidth()) {
+                Text("We've been trying to process your request, but couldn't do it", modifier = Modifier.fillMaxWidth(), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center, color = Color.LightGray)
+            }
+            Button(
+                onClick = {
+                    ProfileViewModel.handleComeBackFromError()
                 },
                 modifier = Modifier.padding(top = 50.dp)
             ){
