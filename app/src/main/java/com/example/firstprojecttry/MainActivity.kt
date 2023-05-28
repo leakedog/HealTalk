@@ -1,9 +1,11 @@
 package com.example.firstprojecttry
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
+import android.view.ViewTreeObserver
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
@@ -15,7 +17,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,7 +24,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,6 +32,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -67,17 +68,20 @@ import com.example.firstprojecttry.Logic.Executor
 import com.example.firstprojecttry.ui.theme.FirstProjectTryTheme
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-class MainActivity : ComponentActivity() {
+
+
+class rl : ComponentActivity() {
+    private var isRenderCompleted = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContent{
+            LoadingBlock()
+        }
+        /*
         setContent {
             // A surface container using the 'background' color from the theme
             FirstProjectTryTheme {
@@ -221,6 +225,22 @@ class MainActivity : ComponentActivity() {
 
                 }
             }
+        }
+
+         */
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "WOW")
+    }
+    override fun onResume() {
+        super.onResume()
+
+        // Проверьте флаг успешного завершения рендеринга в onResume()
+        if (isRenderCompleted) {
+            System.out.println("LODAOD")
+            // Рендеринг успешно завершен, выполните необходимые действия
         }
     }
 }

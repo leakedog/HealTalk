@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">FirstProjectTry</string>
+    <string name="title_activity_load">LoadActivity</string>
+    <string name="title_activity_view">View</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+    <string name="title_activity_bottom_bar_activity.kt">BottomBarActivity.kt</string>
+    <string name="title_activity_bottom_bar">bottomBarActivity</string>
+    <string name="title_activity_login">LoginActivity</string>
 </resources>

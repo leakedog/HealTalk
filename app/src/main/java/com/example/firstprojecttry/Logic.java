@@ -1,5 +1,6 @@
 package com.example.firstprojecttry;
 
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.*;
 
@@ -411,41 +412,109 @@ public class Logic {
     public static class Schedule {
         public Integer prop;
         public String ids;
-        public Map<Integer, Integer> mp;
+        public Map<String, Boolean> mp;
         Schedule() {
+
             mp = new HashMap<>();
+            String []days = {"Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"};
+            String []times = {"Morning", "Afternoon", "Evening", "Night"};
+            for (String time : times) {
+                for (String day : days) {
+                    mp.put(time + " + " + day, false);
+                }
+            }
             ids = "";
             prop = 3;
         }
     }
     public static class Description {
-        private String text;
+        public String aboutYou;
+        public Timestamp dateBirth;
+        public Integer childNumber = null;
 
-        public Description(String text) {
-            this.text = text;
-        }
 
-        Description() {
-            this.text = "";
-        }
-
-        @Override
-        public String toString() {
-            return "Description{" +
-                    "text='" + text + '\'' +
-                    '}';
-        }
-
-        public String getText() {
-            return text;
-        }
-
-        public void setText(String text) {
-            this.text = text;
-        }
     }
     public static class Photo {
-        public Integer id;
+        public String photoURL;
+
+        public String getPhotoURL() {
+            return photoURL;
+        }
+
+        public void setPhotoURL(String photoURL) {
+            this.photoURL = photoURL;
+        }
+    }
+
+
+    public static class DescriptionCharacteristicField{
+        public String title;
+        public String body;
+        public String textFieldTitle;
+        public Integer restrictionValue;
+        public Boolean shouldBeExtended;
+        public Boolean changeable;
+
+        public DescriptionCharacteristicField(String title, String body, String textFieldTitle) {
+            this.title = title;
+            this.body = body;
+            this.textFieldTitle = textFieldTitle;
+            this.restrictionValue = 40;
+            this.shouldBeExtended = false;
+        }
+        public DescriptionCharacteristicField(String title, String body, String textFieldTitle, Boolean changeable) {
+            this.title = title;
+            this.body = body;
+            this.textFieldTitle = textFieldTitle;
+            this.restrictionValue = 40;
+            this.shouldBeExtended = false;
+            this.changeable = changeable;
+        }
+        public DescriptionCharacteristicField(String title, String body, String textFieldTitle, Integer restrictionValue) {
+            this.title = title;
+            this.body = body;
+            this.textFieldTitle = textFieldTitle;
+            this.restrictionValue = restrictionValue;
+            this.shouldBeExtended = (restrictionValue >= 100);
+        }
+        public DescriptionCharacteristicField(String title, String body, String textFieldTitle, Integer restrictionValue, Boolean changeable) {
+            this.title = title;
+            this.body = body;
+            this.textFieldTitle = textFieldTitle;
+            this.restrictionValue = restrictionValue;
+            this.shouldBeExtended = (restrictionValue >= 100);
+            this.changeable = changeable;
+        }
+    }
+
+    static Map<String, DescriptionCharacteristicField> descriptionMap = new HashMap<>();
+
+    static{
+        descriptionMap.put("name",
+                new DescriptionCharacteristicField("Tell us your legal name",
+                                                        "Note that this name should match your document information",
+                                                        "What's your name:", false));
+        descriptionMap.put("aboutYou",
+                new DescriptionCharacteristicField("About you",
+                        "The information you share will be used across our service to help other users get to know you",
+                        "Write about yourself:", 400));
+        descriptionMap.put("dateBirth",
+                new DescriptionCharacteristicField("Your date birth",
+                        "You won't be able to change it after",
+                        "Birth date:", 40,  false));
+        descriptionMap.put("sex",
+                new DescriptionCharacteristicField("Your sex",
+                        "You won't be able to change it after",
+                        "Sex:", 40,  false));
+        descriptionMap.put("childNumber",
+                new DescriptionCharacteristicField("Do you have children?",
+                        "The information you share will be used across our service to help others get to know you and make our service more efficient",
+                        "Number of children:", 40,  true));
+        descriptionMap.put("photoURL",
+                new DescriptionCharacteristicField("Choose your photo",
+                        "By providing your photo, we can create a more personalized and engaging experience tailored specifically to you. Also that enables other users to identify you more easily. This fosters a sense of community and encourages meaningful interactions among our users.",
+                        "Your photo:", 0, false));
+
     }
 
 }
