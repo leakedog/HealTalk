@@ -1,5 +1,6 @@
 package com.example.firstprojecttry;
 
+import static com.example.firstprojecttry.Logic.descriptionMap;
 import static com.example.firstprojecttry.Logic.descriptionStates;
 
 import android.net.Uri;
@@ -33,15 +34,34 @@ public class ProfileViewModel {
 
     public static void uploadExecutor(@NotNull Logic.Executor executor)  {
         for (var x : descriptionStates.entrySet()) {
-            Field field = Logic.DescriptionCharacteristicField.getField(x.getKey(), executor);
-            field.setAccessible(true);
             try {
-                field.set(executor, x.getValue().getValue());
+                Field field = Logic.DescriptionCharacteristicField.getField(x.getKey(), executor);
+                field.setAccessible(true);
+                var hisClass = field.getType();
+                field.set(Logic.DescriptionCharacteristicField.getObject(x.getKey(), executor), hisClass.cast(x.getValue()));
             }catch (Exception e) {
                 System.out.println("ERROR " + e.getMessage());
             }
         }
-        System.out.println("UPDATE");
+        for (var x : descriptionMap.entrySet()) {
+            try {
+                Field field = Logic.DescriptionCharacteristicField.getField(x.getKey(), executor);
+                field.setAccessible(true);
+                System.out.println("UploadExecutor fieldName "  + x.getKey() +  ": " + field.get(Logic.DescriptionCharacteristicField.getObject(x.getKey(), executor)));
+            }catch (Exception e) {
+                System.out.println("ERROR " + e.getMessage());
+            }
+        }
         uploadModel.addExecutor(executor);
+    }
+    public static void showExecutor(@NotNull Logic.Executor executor){
+        navController.navigate("executors/" + executor.getId());
+    }
+    public static void showExecutorFromChat(@NotNull Logic.Executor executor){
+        navController.navigate("executorsFromChat/" + executor.getId());
+    }
+
+    public static void showChatWith(@NotNull Logic.Executor value) {
+        navController.navigate("chats/" + value.getId());
     }
 }

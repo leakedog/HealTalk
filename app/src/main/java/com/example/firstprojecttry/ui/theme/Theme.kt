@@ -66,6 +66,7 @@ fun FirstProjectTryTheme(
             colorScheme = colorScheme,
             typography = Typography,
             content = content
+
     )
 }
 

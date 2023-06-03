@@ -97,8 +97,16 @@ public class AuthModel {
         if (mAuth.getCurrentUser() != null) {
             getCurrentUserToken(null);
         } else {
-            AuthViewModel.showGreeting();
+            System.out.println(" we been there");
+            AuthViewModel.navController.navigate("bottomBar");
+
+            //AuthViewModel.showGreeting();
         }
 
+    }
+
+    public static Logic.User getCurrentUser() {
+        //TODO find really who i am
+        return Logic.Executor.container.getFirst();
     }
 }

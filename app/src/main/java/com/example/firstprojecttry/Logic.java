@@ -1,59 +1,65 @@
 package com.example.firstprojecttry;
 
-import static androidx.compose.runtime.SnapshotStateKt.mutableStateOf;
-
-import androidx.compose.runtime.MutableState;
+import static com.example.firstprojecttry.Logic.User.container;
 
 import java.lang.reflect.Field;
-import java.sql.Timestamp;
 import java.text.DateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-
-abstract class CopyCat<T> {
-    protected String token;
-    public String getToken(){
-
-        return token;
-    }
-    public void setToken(){
-        this.token = token;
-    }
-    protected int id;
-    abstract void copy(T o);
-    public void setId(int id) {
-        this.id = id;
-    }
-    public Integer getId() {
-        return id;
-    }
+interface CopyCat<T> {
+     void copy(T o);
 }
 
-class FeedContainer <T extends CopyCat<T>> {
-    Map<Integer, T> container;
-    FeedContainer() {
-        container = new HashMap<>();
-    }
-    void update(int id, T value) {
-        System.out.println("Copied successfully!");
-        if (container.containsKey(id)) {
-            Objects.requireNonNull(container.get(id)).copy(value);
-        } else {
-            container.put(id, value);
-        }
-    }
-    Integer getSize() {
-        return container.size();
-    }
-    T get(Integer i) {
-        return container.get(i);
-    }
-}
+
 
 public class Logic {
+    static private Integer lastUserId = 0;
+    static public Integer getNextUserId(){
+        while(User.container.get(lastUserId) != null)
+            lastUserId++;
+        return lastUserId;
+    }
+    public static class User{
+        static FeedContainer<User> container = new FeedContainer<User>();
+        protected String token;
+        protected Photo photo;
+        protected String name;
+        public void copy(User from){
+            this.token = from.token;
+            this.id = from.id;
+        }
+        public Photo getPhoto(){
+            return this.photo;
+        }
+        public void setPhoto(Photo x){
+            this.photo = x;
+        }
+        public String getToken(){
+
+            return token;
+        }
+        public void setToken(){
+            this.token = token;
+        }
+        protected int id;
+        public void setId(int id) {
+            this.id = id;
+        }
+        public Integer getId() {
+            return id;
+        }
+
+        public String getName(){return this.name;}
+        public void setName(String s){this.name = s;}
+    }
     public static class Location{
         private Double lat, lng;
-
+        public Location() {
+            lat = lng = 0.;
+        }
         public void setLat(Double lat) {
             this.lat = lat;
         }
@@ -75,9 +81,9 @@ public class Logic {
             return lng;
         }
     }
-    public static class Client extends CopyCat<Client>{
-        protected static FeedContainer<Client> container = new FeedContainer<>();
-        private String name;
+    public static class Client extends User implements CopyCat<Client>{
+        protected static FeedContainer<Client> container = new FeedContainer<Client>();
+
         private Description description;
         private Integer childrenNumber; /// how many need to be looked after
         private Side preferredSide;
@@ -92,10 +98,22 @@ public class Logic {
             location = "";
             photo = new Photo();
             rating = calculate(this);
-            id = container.getSize();
+            id = getNextUserId();
             container.update(id, this);
         }
 
+        Client(String Name, Description description, Integer childrenNumber, Photo photo, Side preferredSide, String location, String token) {
+            this.name = Name;
+            this.description = description;
+            this.childrenNumber = childrenNumber;
+            this.preferredSide = preferredSide;
+            this.location = location;
+            this.rating = calculate(this);
+            this.id = getNextUserId();
+            this.token = token;
+            this.photo = photo;
+            container.update(this.id, this);
+        }
         Client(String Name, Description description, Integer childrenNumber, Side preferredSide, String location, String token) {
             this.name = Name;
             this.description = description;
@@ -103,7 +121,7 @@ public class Logic {
             this.preferredSide = preferredSide;
             this.location = location;
             this.rating = calculate(this);
-            this.id = container.getSize();
+            this.id = getNextUserId();
             this.token = token;
             container.update(this.id, this);
         }
@@ -182,29 +200,27 @@ public class Logic {
         EXECUTORHOME,
         BOTH
     }
-    public static class Executor extends CopyCat<Executor> {
-        protected static FeedContainer<Executor> container = new FeedContainer<>();
-        private String name;
+    public static class Executor extends User implements CopyCat<Executor> {
+        public static FeedContainer<Executor> container = new FeedContainer<>();
         private Description description;
         private Schedule schedule;
         private Integer price;
-        private Photo photo;
         private Rating rating;
         private Side preferredSide;
         private Location location;
-        Executor() {
+        public Executor() {
             description = new Description();
             price = 0;
             preferredSide = Side.BOTH;
             photo = new Photo();
             rating = calculate(this);
-            id = container.getSize();
+            id = getNextUserId();
             container.update(id, this);
             System.out.println(this);
             schedule = new Schedule();
         }
 
-        Executor(Integer id, String name, Description description, Schedule schedule, Integer price, Photo photo, Side preferredSide, Location location) {
+        public Executor(Integer id, String name, Description description, Schedule schedule, Integer price, Photo photo, Side preferredSide, Location location, String token) {
             this.name = name;
             this.id = id;
             this.description = description;
@@ -214,10 +230,24 @@ public class Logic {
             this.preferredSide = preferredSide;
             this.location = location;
             this.rating = calculate(this);
-            this.id = container.getSize();
+            this.token = token;
             container.update(this.id, this);
             System.out.println(description);
         }
+        public Executor(Integer id, String name, Description description, Schedule schedule, Integer price, Photo photo, Side preferredSide, Location location) {
+            this.name = name;
+            this.id = id;
+            this.description = description;
+            this.schedule = schedule;
+            this.price = price;
+            this.photo = photo;
+            this.preferredSide = preferredSide;
+            this.location = location;
+            this.rating = calculate(this);
+            container.update(this.id, this);
+            System.out.println(description);
+        }
+
 
         @Override
         public void copy(Executor o) {
@@ -231,9 +261,7 @@ public class Logic {
             this.location = o.location;
         }
 
-        public void setName(String name) {
-            name = name;
-        }
+
 
 
         public void setDescription(Description description) {
@@ -263,7 +291,7 @@ public class Logic {
         public void setLocation(Location location) {
             this.location = location;
         }
-        public String getName() {return name; }
+
 
         public Side getPreferredSide() {
             return preferredSide;
@@ -295,18 +323,26 @@ public class Logic {
 
     }
 
-    public static class Order extends CopyCat<Order> {
+    public static class Order implements CopyCat<Order> {
         static FeedContainer<Order> container = new FeedContainer<>();
-
+        protected Integer id;
         private Client client;
         private Executor executor;
         private DateFormat date;
         private Integer customerExperience;
         private Integer executorExperience;
         //    private Integer hours;
+        public Integer getId(){
+            return this.id;
+        }
+        public void setId(Integer id){
+            this.id = id;
+        }
         Order(){}
 
-
+        static public Integer getNextOrderId(){
+            return container.getSize();
+        }
         Order(Client client, Executor executor, DateFormat date, Integer customerExperience, Integer executorExperience/*, Integer hours*/){
             this.client = client;
             this.executor = executor;
@@ -314,11 +350,11 @@ public class Logic {
             this.customerExperience = customerExperience;
             this.executorExperience = executorExperience;
 
-            id = container.getSize();
+            id = getNextOrderId();
             container.update(id, this);
         }
 
-        void copy(Order o) {
+        public void copy(Order o) {
             this.client = o.client;
             this.executor = o.executor;
             this.date = o.date;
@@ -429,15 +465,26 @@ public class Logic {
     public static class Schedule {
         public Integer prop;
         public String ids;
-        public Map<String, Boolean> mp;
-        Schedule() {
-
-            mp = new HashMap<>();
+        public Map<String, Boolean> scheduleMap;
+        public static List<String> keyNames;
+        static {
+            keyNames = new ArrayList<>();
             String []days = {"Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"};
             String []times = {"Morning", "Afternoon", "Evening", "Night"};
             for (String time : times) {
                 for (String day : days) {
-                    mp.put(time + " + " + day, false);
+                    keyNames.add(time + " + " + day);
+                }
+            }
+        }
+        Schedule() {
+
+            scheduleMap = new HashMap<>();
+            String []days = {"Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"};
+            String []times = {"Morning", "Afternoon", "Evening", "Night"};
+            for (String time : times) {
+                for (String day : days) {
+                    scheduleMap.put(time + " + " + day, false);
                 }
             }
             ids = "";
@@ -446,14 +493,14 @@ public class Logic {
     }
     public static class Description {
         public String aboutYou;
-        public Timestamp dateBirth;
+        public Integer dateBirth;
         public Integer childNumber;
         public String sex;
         Description() {
             sex = new String("Male");
             childNumber = 0;
             aboutYou = new String("");
-            dateBirth = new Timestamp(0);
+            dateBirth = 0;
         }
 
     }
@@ -467,6 +514,10 @@ public class Logic {
         public void setPhotoURL(String photoURL) {
             this.photoURL = photoURL;
         }
+        Photo(String photoURL){
+            this.photoURL = photoURL;
+        }
+        Photo(){}
     }
 
 
@@ -478,12 +529,16 @@ public class Logic {
         public Boolean shouldBeExtended;
         public Boolean changeable;
 
+        public static List<Class<?>> classToCheckList = List.of(Logic.Executor.class, Logic.User.class, Logic.Schedule.class, Logic.Description.class, Logic.Photo.class);
+
+
         public DescriptionCharacteristicField(String title, String body, String textFieldTitle) {
             this.title = title;
             this.body = body;
             this.textFieldTitle = textFieldTitle;
             this.restrictionValue = 40;
             this.shouldBeExtended = false;
+            this.changeable = true;
         }
         public DescriptionCharacteristicField(String title, String body, String textFieldTitle, Boolean changeable) {
             this.title = title;
@@ -499,6 +554,7 @@ public class Logic {
             this.textFieldTitle = textFieldTitle;
             this.restrictionValue = restrictionValue;
             this.shouldBeExtended = (restrictionValue >= 100);
+            this.changeable = true;
         }
         public DescriptionCharacteristicField(String title, String body, String textFieldTitle, Integer restrictionValue, Boolean changeable) {
             this.title = title;
@@ -524,51 +580,69 @@ public class Logic {
                         field.setAccessible(true);
                         return executor.photo;
                     } catch (Exception error2) {
-                        System.out.println("Exception in uploadExecutor: " + error2.getMessage());
+                        try {
+                            var field = Logic.Schedule.class.getDeclaredField(name);
+                            field.setAccessible(true);
+                            return executor.getSchedule();
+                        } catch (Exception error3) {
+                            try{
+                                var field = Logic.User.class.getDeclaredField(name);
+                                field.setAccessible(true);
+                                return (User)executor;
+                            }
+                            catch (Exception error4) {
+                                System.out.println("Exception in getObject: " + error3.getMessage() + " " + name);
+                            }
+                        }
                     }
                 }
             }
             return null;
         }
         public static Field getField(String name, Executor executor) {
-            try {
-                var field = Logic.Executor.class.getDeclaredField(name);
-                field.setAccessible(true);
-                return field;
-            } catch (Exception error) {
+            for (Class<?> me : classToCheckList) {
                 try {
-                    var field = Logic.Description.class.getDeclaredField(name);
+                    var field = me.getDeclaredField(name);
                     field.setAccessible(true);
                     return field;
-                } catch (Exception error1) {
-                    try {
-                        var field = Logic.Photo.class.getDeclaredField(name);
-                        field.setAccessible(true);
-                        return field;
-                    } catch (Exception error2) {
-                        System.out.println("Exception in uploadExecutor: " + error2.getMessage());
-                    }
+                } catch (Exception ignored) {
+
                 }
             }
+            System.out.println("Didn't found in getField");
+            assert(false);
             return null;
         }
-        public static String getFieldValue(String name, Executor executor) {
+        public static Object getFieldValue(String name, Executor executor) {
             try {
                 var field = Logic.Executor.class.getDeclaredField(name);
                 field.setAccessible(true);
-                return (String)field.get(executor);
+                return field.get(executor);
             } catch (Exception error) {
                 try {
                     var field = Logic.Description.class.getDeclaredField(name);
                     field.setAccessible(true);
-                    return (String)field.get(executor.getDescription());
+                    return field.get(executor.getDescription());
                 } catch (Exception error1) {
                     try {
                         var field = Logic.Photo.class.getDeclaredField(name);
                         field.setAccessible(true);
-                        return (String)field.get(executor.getPhoto());
+                        return field.get(executor.getPhoto());
                     } catch (Exception error2) {
-                        System.out.println("Exception in uploadExecutor: " + error2.getMessage() + " " + name);
+                        try {
+                            var field = Logic.Schedule.class.getDeclaredField(name);
+                            field.setAccessible(true);
+                            return field.get(executor.getSchedule());
+                        } catch (Exception error3) {
+                            try{
+                                var field = Logic.User.class.getDeclaredField(name);
+                                field.setAccessible(true);
+                                return field.get(executor);
+                            }
+                            catch (Exception error4) {
+                                System.out.println("Exception in getObject: " + error3.getMessage() + " " + name);
+                            }
+                        }
                     }
                 }
             }
@@ -576,14 +650,15 @@ public class Logic {
         }
     }
 
+
     public static Map<String, DescriptionCharacteristicField> descriptionMap = new HashMap<>();
-    public static Map<String, MutableState<String>> descriptionStates = new HashMap<>();
+    public static Map<String, Object> descriptionStates = new HashMap<>();
 
     static{
         descriptionMap.put("name",
                 new DescriptionCharacteristicField("Tell us your legal name",
                                                         "Note that this name should match your document information",
-                                                        "What's your name:", false));
+                                                        "What's your name:", true));
         descriptionMap.put("aboutYou",
                 new DescriptionCharacteristicField("About you",
                         "The information you share will be used across our service to help other users get to know you",
@@ -604,7 +679,10 @@ public class Logic {
                 new DescriptionCharacteristicField("Choose your photo",
                         "By providing your photo, we can create a more personalized and engaging experience tailored specifically to you. Also that enables other users to identify you more easily. This fosters a sense of community and encourages meaningful interactions among our users.",
                         "Your photo:", 0, false));
-
+            descriptionMap.put("scheduleMap",
+                    new DescriptionCharacteristicField("Choose your schedule",
+                            "You should select your free time, so that we will be able to find client for you",
+                            "Skip", true));
 
     }
 

@@ -1,5 +1,6 @@
 package com.example.firstprojecttry
 
+import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.net.Uri
 import android.os.Bundle
@@ -26,53 +27,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.example.firstprojecttry.Logic.Executor
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
+import kotlin.concurrent.thread
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            /*
-            uploadModel.addClient(
-                Logic.Client(
-                    "DOESNT.. PAY OFF",
-                    Logic.Description(),
-                    1,
-                    Logic.Side.EXECUTORHOME,
-                    "fuk",
-                    "35138517"
-                )
-            );
-            uploadModel.addClient(
-                Logic.Client(
-                    "HardWORK",
-                    Logic.Description(),
-                    1,
-                    Logic.Side.EXECUTORHOME,
-                    "fuk",
-                    "857192538.13512"
-                )
-            );
-            uploadModel.addClient(
-                Logic.Client(
-                    "Vasya",
-                    Logic.Description(),
-                    1,
-                    Logic.Side.EXECUTORHOME,
-                    "fuk",
-                    "97518.325"
-                )
-            );
-
-            */
             val navController = rememberNavController()
             AuthViewModel.navController = navController;
             ProfileViewModel.navController = navController;
@@ -85,12 +57,16 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MyApp(navController: NavHostController) {
-    NavHost(navController, startDestination = "start") {
+    NavHost(navController, startDestination = "demontt") {
         composable("error") {
             ErrorScreen()
         }
         composable("loading") {
             LoadingBlock()
+        }
+        composable("demontt"){
+         //   Thread.sleep(10000)
+            demonstrate()
         }
         navigation(startDestination = "greeting", route = "start") {
             composable("greeting") {
@@ -106,12 +82,48 @@ fun MyApp(navController: NavHostController) {
         }
         navigation(startDestination = "profile", route = "loggedApp") {
             composable("profile") {
+
+                uploadModel()
+                uploadModel.setNavigation(navController);
+
+                //uploadModel.loadedResources.waitUntilLoaded();
+
+                //demonstrate()
                 PreviewProfilePage()
             }
 
+
         }
-        
-        
+        navigation(startDestination = "chat", route = "messages"){
+            composable("chat"){
+                demonstrate()
+            }
+        }
+        composable("search") {
+            ShowMap()
+        }
+        composable("executors/{userId}",   arguments = listOf(navArgument("userId") { type = NavType.IntType })) {
+            var backStackEntry = navController.currentBackStackEntry!!;
+            var executor = remember{mutableStateOf(Executor.container.get(backStackEntry.arguments!!.getInt("userId")))}
+            ExecutorCard(executor = executor, onGoBack = {
+                navController.navigate("search")
+            })
+        }
+        composable("executorsFromChat/{userId}",   arguments = listOf(navArgument("userId") { type = NavType.IntType })) {
+            var backStackEntry = navController.currentBackStackEntry!!;
+            val userId = backStackEntry.arguments!!.getInt("userId")
+            var executor = remember{mutableStateOf(Executor.container.get(backStackEntry.arguments!!.getInt("userId")))}
+            ExecutorCard(executor = executor, onGoBack = {
+                navController.navigate("chats/$userId")
+            }, fromChat = true)
+        }
+        composable("chats/{userId}",   arguments = listOf(navArgument("userId") { type = NavType.IntType })) {
+            var backStackEntry = navController.currentBackStackEntry!!
+            val userId = backStackEntry.arguments!!.getInt("userId")
+            ShowChatScreen(x = Messenger.startCommunication(AuthModel.getCurrentUser().getId(), userId), viewer = AuthModel.getCurrentUser().getId(), goBackFun = {
+                navController.navigate("search")
+            })
+        }
     }
 }
 

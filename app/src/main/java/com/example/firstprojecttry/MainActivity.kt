@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,9 +46,12 @@ import com.example.firstprojecttry.Logic.*
 import com.example.firstprojecttry.uploadModel.addClient
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 
 
 class rl : ComponentActivity() {
@@ -179,28 +184,68 @@ fun getBitMap(
 }
 @Composable
 fun DisplayAllMarkers(marks: List<Executor>, updateStatus: (Executor) -> Unit){
-    var id = 0
-   // var sample = listOf<LatLng>(LatLng(50.0600659,19.921837), LatLng(50.059785, 19.923739), LatLng(50.0614285,19.9209253), LatLng(50.0597667,19.9201786), LatLng(50.065081, 19.923790), LatLng(50.058137, 19.924342), LatLng(50.061567, 19.926101))
+    // var sample = listOf<LatLng>(LatLng(50.0600659,19.921837), LatLng(50.059785, 19.923739), LatLng(50.0614285,19.9209253), LatLng(50.0597667,19.9201786), LatLng(50.065081, 19.923790), LatLng(50.058137, 19.924342), LatLng(50.061567, 19.926101))
     /*val bitmap = BitmapFactory.decodeResource(
         LocalContext.current.resources,
         R.drawable.marksitter
     )*/
-    for(executor in marks){
+    for((id, executor) in marks.withIndex()){
         var checkedState by remember {mutableStateOf(false)}
-        if(checkedState == true){
+        if(checkedState){
             updateStatus(executor)
             checkedState = false
         }
+        println("DEBUG 1 " + executor.id)
+        println("DEBUG 2 " + executor.location)
+        if (executor.location == null) continue;
+        println("DEBUG 3 " + executor.location.lat)
+
         Marker(
-            state = MarkerState(position = LatLng(executor.getLocation().lat, executor.getLocation().lng)),
+            state = MarkerState(position = LatLng(executor.location.lat, executor.location.lng)),
             onClick = {mar ->
                 checkedState = true
                 true
             },
             icon = getBitMap(LocalContext.current, R.drawable.smaller)
         )
-        id++
     }
+}
+
+
+@Composable
+fun ShowMap() {
+    var showId by remember {mutableStateOf(Executor())}
+    var showExecutor = remember {mutableStateOf(false)}
+    val displayCard = {a: Executor -> showId = a
+        showExecutor.value = true
+    }
+    val center = LatLng(50.0614285,19.9209253)
+    val cameraPositionState = rememberCameraPositionState{
+        position = CameraPosition.fromLatLngZoom(center, 17f)
+    }
+    Scaffold(
+        bottomBar = {
+            BottomBar()
+        }
+    ) {
+        paddingValues ->
+        GoogleMap(
+            modifier = Modifier.padding(paddingValues).fillMaxSize(),
+            cameraPositionState = cameraPositionState
+        ) {
+            if (showExecutor.value) {
+                ProfileViewModel.showExecutor(showId)
+            } else{
+                val executors = ArrayList<Executor>();
+                for (executor in Executor.container.container) {
+                    executors.add(executor.value)
+                }
+
+                DisplayAllMarkers(executors, displayCard)
+            }
+        }
+    }
+
 }
 
 /*
@@ -308,274 +353,3 @@ fun createProgressBar(value: Float, outOf: Float, color: Color) {
     )
 }
 
-/*
-@Composable
-fun ExecutorCardInfo(executor: Executor) {
-    FirstProjectTryTheme {
-        Box(modifier = Modifier.fillMaxHeight()) {
-            Column {
-                Spacer(modifier = Modifier.height(10.dp))
-                createTitleLargeText(
-                    text = executor.name,
-                    paddingValues = PaddingValues(start = 14.dp),
-                    theme = MaterialTheme
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Box(Modifier.width(500.dp)) {
-                    Image(
-                        painter = painterResource(
-                            if(executor.name[0] == 'E'){
-                            R.drawable.elizabet
-                            }else{
-                                 if(executor.name[0] == 'M'){
-                                     R.drawable.john
-                                 }else{
-                                    R.drawable.jack
-                                 }
-                            }),
-                        contentDescription = "Contact profile picture",
-                        modifier = Modifier
-                            .padding(top = 5.dp)
-                            .size(150.dp)
-                            .clip(CircleShape)
-                            .border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                            .align(Alignment.TopStart)
-                    )
-                    Column(modifier = Modifier.align(Alignment.TopEnd)) {
-                        createTitleMediumText(
-                            text = "Price - " + executor.price.toString() + " rubles",
-                            paddingValues = PaddingValues(start = 22.dp),
-                            theme = MaterialTheme
-                        )
-                        createProgressBar(
-                            value = executor.price.toFloat(),
-                            outOf = 30f,
-                            color = Color.Green
-                        )
-                        createTitleMediumText(
-                            text = "Rating - " + (executor.rating as? Float
-                                ?: 0f).toString(),
-                            paddingValues = PaddingValues(start = 22.dp, top = 10.dp),
-                            theme = MaterialTheme
-                        )
-                        createProgressBar(
-                            value = executor.rating.grade.toFloat(),
-                            outOf = 10f,
-                            color = Color.Green
-                        )
-                    }
-
-                }
-                createTitleInfoText(
-                    text = "About me",
-                    paddingValues = PaddingValues(start = 14.dp),
-                    theme = MaterialTheme
-                )
-                Text(
-                    text = "executor.description.text",
-                    color = MaterialTheme.colorScheme.secondary,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(start = 14.dp)
-                )
-                Text(
-                    text = "When works",
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(start = 14.dp)
-                )
-                ColorGrid()
-            }
-            Button(
-                onClick = {
-                    ServerLogic.addExecutor(executor)
-                }, modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 20.dp)
-                    .width(200.dp)
-            ) {
-                Text(
-                    text = "Order",
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-        }
-    }
-}
-@Composable
-fun ColorGrid() {
-    LazyHorizontalGrid(
-        rows = GridCells.Adaptive(35.dp),
-    ) {
-        items(listOf(-1, 0, 1, 2, 3)) { index ->
-            Row (){
-                val time = when (index) {
-                    0 -> "Morning"
-                    1 -> "Afternoon"
-                    2 -> "Evening"
-                    3 -> "Night"
-                    else -> ""
-                }
-                Box (modifier = Modifier.width(130.dp)) {
-                    Text(
-                        text = time,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 20.sp,
-                        modifier = Modifier.padding(5.dp)
-                    )
-                }
-                for (i in 1..7) {
-
-                    Box(Modifier.padding(start = 5.dp, end = 5.dp, top = 7.dp)) {
-                        if (index < 0) {
-                            val day = when (i) {
-                                1 -> "Mo"
-                                2 -> "Tu"
-                                3 -> "We"
-                                4 -> "Th"
-                                5 -> "Fr"
-                                6 -> "Sa"
-                                7 -> "Su"
-                                else -> ""
-                            }
-                            Surface(
-                                shape = RectangleShape,
-                                modifier = Modifier
-                                    .animateContentSize()
-                                    .padding(1.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(25.dp)
-                                        .width(25.dp)
-                                        .height(25.dp)
-                                ) {
-                                    Text(
-                                        text = day,
-                                        fontWeight = FontWeight.Normal,
-                                        fontSize = 17.sp,
-                                    )
-                                }
-                            }
-                        } else {
-                            var isChanged by remember { mutableStateOf(false) }
-                            // surfaceColor will be updated gradually from one color to the other
-                            val surfaceColor by animateColorAsState(
-                                if (isChanged) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                            )
-                            var borderColor by remember { mutableStateOf(Color.Black) } // track border color
-                            Surface(
-                                shape = RectangleShape,
-                                // surfaceColor color will be changing gradually from primary to surface
-                                color = surfaceColor,
-                                // animateContentSize will change the Surface size gradually
-                                modifier = Modifier
-                                    .animateContentSize()
-                                    .padding(1.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(25.dp)
-                                        .border(width = 1.dp, color = borderColor)
-                                        .clickable {
-                                            isChanged = !isChanged
-                                            borderColor =
-                                                if (borderColor == Color.Black) Color.White else Color.Black // toggle border color on click
-
-                                        }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-fun closeExecutorCard(visible: MutableState<Boolean>) {
-    visible.value = !visible.value;
-}
-
-/*
-@Composable
-fun MessageCard(msg: Message) {
-    Row(modifier = Modifier.padding(all = 8.dp)) {
-
-        Spacer(modifier = Modifier.width(10.dp))
-        var isExpanded by remember { mutableStateOf(false) }
-        val surfaceColor by animateColorAsState(
-            if (isExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-        )
-        Column(modifier = Modifier.clickable { isExpanded = !isExpanded }) {
-            Text(
-                text = msg.author,
-                color = MaterialTheme.colorScheme.secondary,
-                style = MaterialTheme.typography.titleSmall
-
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-            Surface(shape = MaterialTheme.shapes.medium, shadowElevation = 1.dp, color = surfaceColor,
-                    modifier = Modifier
-                        .animateContentSize()
-                        .padding(1.dp)) {
-                Text(
-                    text = msg.body,
-                    modifier = Modifier.padding(all = 4.dp),
-                    // If the message is expanded, we display all its content
-                    // otherwise we only display the first line
-                    maxLines = if (isExpanded) Int.MAX_VALUE else 1,
-                    style = MaterialTheme.typography.bodyMedium
-
-                )
-            }
-
-
-        }
-
-    }
-}
-
-
-
-
-/*
-@Preview (name = "Light Mode")
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true,
-    name = "Dark Mode"
-)
-
-
-@Composable
-fun PreviewMessageCardE() {
-    FirstProjectTryTheme {
-        Surface {
-            MessageCard(
-                msg = Message("Lexi", "Hey, take a look at Jetpack Compose, it's great!")
-            )
-        }
-    }
-
-}
-
-
-@Composable
-fun Conversation(messages: List<Message>) {
-    LazyColumn {
-        items(messages) { message ->
-            MessageCard(message)
-        }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewConversation() {
-    FirstProjectTryTheme {
-        Conversation(SampleData.conversationSample)
-    }
-}*/
-        */

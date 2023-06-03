@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -46,6 +48,7 @@ import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -115,7 +118,7 @@ fun Navigation(
         }
 
         composable("messages") {
-            MessengerScreen()
+            MessengerScreen(navController = navController)
         }
 
         composable("profile") {
@@ -136,22 +139,23 @@ data class BottomNavItem(
 @Composable
 fun BottomNavigationBar(
     items: List<BottomNavItem>,
-    navController: NavController,
+    navController: NavController = uploadModel.navController,
     modifier: Modifier = Modifier,
     onItemClick: (BottomNavItem) -> Unit
 ) {
     val backStackEntry = navController.currentBackStackEntryAsState();
+    println(  "EVAL " + backStackEntry.value?.destination?.route)
     NavigationBar(
         modifier = modifier,
-
     ) {
         items.forEach { item ->
+            println("EVAL " + item.route + " " + backStackEntry.value?.destination?.route)
             val selected = item.route == backStackEntry.value?.destination?.route;
             NavigationBarItem(
                 selected = selected,
                 onClick = { onItemClick(item)},
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.Green,
+                    selectedIconColor =  colorResource(id = R.color.purple_500),
                     selectedTextColor = Color.Black,
                     unselectedIconColor = Color.Gray,
                     unselectedTextColor = Color.Gray
@@ -212,6 +216,35 @@ fun BottomNavigationBar(
     }
 
 }
+
+@Composable
+fun BottomBar() {
+    val ve = remember{ mutableIntStateOf(Integer.valueOf(0)) };
+    ve.value = 23;
+    BottomNavigationBar(
+        items = listOf(
+            BottomNavItem(
+                name = "Search",
+                route = "search",
+                painter = painterResource(id = R.drawable.search)
+            ),
+            BottomNavItem(
+                name = "Messages",
+                route = "chat",
+                painter = painterResource(id = R.drawable.messages),
+                messagesCount = ve
+            ),
+            BottomNavItem(
+                name = "Profile",
+                route = "profile",
+                icon = Icons.Default.Person,
+            )
+        ),
+        onItemClick = {
+            uploadModel.navController.navigate(it.route)
+        }
+    )
+}
 @Composable
 fun SearchScreen() {
     Box(
@@ -223,12 +256,17 @@ fun SearchScreen() {
 }
 
 @Composable
-fun MessengerScreen() {
+fun MessengerScreen(navController: NavController) {
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
         Text(text = "Messenger screen")
+        Button(onClick = {
+            navController.navigate("error")
+        }) {
+            Text("click me")
+        }
     }
 }
 
@@ -243,11 +281,11 @@ fun ProfileScreen() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
+
 @Composable
-fun CheckView() {
-    val navController = rememberNavController();
-    val ve = remember{mutableStateOf(Integer.valueOf(0))};
+fun CheckView(navController: NavController) {
+    println("bottomBar")
+    val ve = remember{ mutableIntStateOf(Integer.valueOf(0)) };
     ve.value = 23;
     Scaffold(bottomBar = {
         BottomNavigationBar(
@@ -278,7 +316,7 @@ fun CheckView() {
         )
     }) {
         paddingValues ->  Box(modifier = Modifier.padding(paddingValues)) {
-            Navigation(navController = navController)
+
         }
     }
 }

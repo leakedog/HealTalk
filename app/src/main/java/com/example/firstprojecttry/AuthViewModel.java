@@ -9,6 +9,7 @@ public class AuthViewModel {
     static void showGreeting() {
         navController.navigate("greeting");
     }
+    static void showChat(){navController.navigate("demontt");}
     public static void showLogin() {
         navController.navigate("login");
     }
@@ -55,11 +56,12 @@ public class AuthViewModel {
     public static void handleToken(String realToken) {
         token = realToken;
         System.out.println("Token: " + realToken);
-        navController.navigate("loggedApp");
+        navController.navigate("LoggedApp"); /// loggedApp
     }
 
 
     public static void handleComeBackFromError() {
         showGreeting();
     }
+
 }
