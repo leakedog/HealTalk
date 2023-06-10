@@ -62,6 +62,21 @@ public class uploadModel {
 
     public static Boolean Loaded = false;
 
+    public static void addUser(User user) {
+        try {
+            var executor = (Executor) user;
+            addExecutor(executor);
+        } catch (Exception e1) {
+            try {
+                var client = (Client) user;
+                assert client != null;
+                addClient(client);
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
+    }
+
 
     static public class LoadWait{
         final int EXPECT = 5;
@@ -70,7 +85,6 @@ public class uploadModel {
         void update(int id){
             if(isDone)
                 return;
-          //  System.out.println("yo yo yo\n");
             maskLoaded |= (1 << id);
             System.out.println(maskLoaded + " We did it again");
             if(maskLoaded == (1 << EXPECT) - 1){
@@ -112,7 +126,7 @@ public class uploadModel {
         mAuth = FirebaseAuth.getInstance();
     }
 
-    /// so far we have on verificatio of your public code using your token, to do this we just need to make a new database that stores (public_id, token)
+    /// so far we have on verification of your public code using your token, to do this we just need to make a new database that stores (public_id, token)
     protected static void addClient(Client person) {
         mDatabase.child("users").child("clients").child("info").child(person.getId().toString()).setValue(person).addOnCompleteListener(insertionReaction("Client")).addOnFailureListener(failureReaction("Client"));
 

@@ -65,12 +65,12 @@ fun MyApp(navController: NavHostController) {
             LoadingBlock()
         }
         composable("demontt"){
-         //   Thread.sleep(10000)
+            //   Thread.sleep(10000)
             demonstrate()
         }
         navigation(startDestination = "greeting", route = "start") {
             composable("greeting") {
-                GreetingScreen(navController)
+                GreetingScreen()
             }
             composable("login") {
                 LoginScreen(navController)
@@ -78,7 +78,7 @@ fun MyApp(navController: NavHostController) {
             composable("registration") {
                 SignUpScreen(navController)
             }
-           
+
         }
         navigation(startDestination = "profile", route = "loggedApp") {
             composable("profile") {
@@ -164,7 +164,6 @@ fun Screen3(navController: NavController) {
 fun Screen4(navController: NavController) {
     Text("Screen4")
 }
-
 
 
 

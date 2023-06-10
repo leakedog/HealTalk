@@ -6,4 +6,5 @@
     <string name="title_activity_bottom_bar_activity.kt">BottomBarActivity.kt</string>
     <string name="title_activity_bottom_bar">bottomBarActivity</string>
     <string name="title_activity_login">LoginActivity</string>
+    <string name="default_web_client_idd" />
 </resources>

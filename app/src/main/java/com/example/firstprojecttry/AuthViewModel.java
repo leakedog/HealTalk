@@ -64,4 +64,8 @@ public class AuthViewModel {
         showGreeting();
     }
 
+    public static Logic.User getCurrentUser() {
+        return AuthModel.getCurrentUser();
+    }
+
 }

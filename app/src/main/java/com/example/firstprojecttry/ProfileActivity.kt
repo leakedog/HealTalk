@@ -419,6 +419,7 @@ fun AvailabilityBlock(executor : MutableState<Executor>, changeable: Boolean = t
     for (i in Logic.Schedule.keyNames) {
         stateGrid.value[i] = rememberSaveable{ mutableStateOf(executor.value.schedule.scheduleMap[i]!!) }
     }
+
     ListItem(
         headlineContent = {
             Surface(
@@ -506,7 +507,7 @@ fun ProfilePage(executor: MutableState<Executor>, theme: MaterialTheme) {
                     Surface(
                         onClick = {
                             descriptionStates["photoURL"] = photoURL.value;
-                            ProfileViewModel.uploadExecutor(executor.value)
+                            ProfileViewModel.uploadUser(executor.value)
                         },
 
                         ) {

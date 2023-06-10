@@ -32,7 +32,7 @@ public class ProfileViewModel {
         navController.navigate("profile");
     }
 
-    public static void uploadExecutor(@NotNull Logic.Executor executor)  {
+    public static void uploadUser(@NotNull Logic.User executor)  {
         for (var x : descriptionStates.entrySet()) {
             try {
                 Field field = Logic.DescriptionCharacteristicField.getField(x.getKey(), executor);
@@ -52,7 +52,7 @@ public class ProfileViewModel {
                 System.out.println("ERROR " + e.getMessage());
             }
         }
-        uploadModel.addExecutor(executor);
+        uploadModel.addUser(executor);
     }
     public static void showExecutor(@NotNull Logic.Executor executor){
         navController.navigate("executors/" + executor.getId());

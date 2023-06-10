@@ -26,7 +26,11 @@ public class Logic {
         static FeedContainer<User> container = new FeedContainer<User>();
         protected String token;
         protected Photo photo;
+
+        protected Description description;
+
         protected String name;
+
         public void copy(User from){
             this.token = from.token;
             this.id = from.id;
@@ -38,7 +42,6 @@ public class Logic {
             this.photo = x;
         }
         public String getToken(){
-
             return token;
         }
         public void setToken(){
@@ -54,6 +57,12 @@ public class Logic {
 
         public String getName(){return this.name;}
         public void setName(String s){this.name = s;}
+
+        public Description getDescription() {
+            return description;
+        }
+        public void setDescription(Description description) {this.description = description;}
+
     }
     public static class Location{
         private Double lat, lng;
@@ -84,7 +93,6 @@ public class Logic {
     public static class Client extends User implements CopyCat<Client>{
         protected static FeedContainer<Client> container = new FeedContainer<Client>();
 
-        private Description description;
         private Integer childrenNumber; /// how many need to be looked after
         private Side preferredSide;
         private String location;
@@ -136,18 +144,7 @@ public class Logic {
             this.rating = change.rating;
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
 
-        public String getName() {
-            return name;
-        }
-
-
-        public Description getDescription() {
-            return description;
-        }
 
         public Integer getChildrenNumber() {
             return childrenNumber;
@@ -161,18 +158,11 @@ public class Logic {
             return location;
         }
 
-        public Photo getPhoto() {
-            return photo;
-        }
 
         public Rating getRating() {
             return rating;
         }
 
-
-        public void setDescription(Description description) {
-            this.description = description;
-        }
 
         public void setChildrenNumber(Integer childrenNumber) {
             this.childrenNumber = childrenNumber;
@@ -184,10 +174,6 @@ public class Logic {
 
         public void setLocation(String location) {
             this.location = location;
-        }
-
-        public void setPhoto(Photo photo) {
-            this.photo = photo;
         }
 
         public void setRating(Rating rating) {
@@ -202,7 +188,6 @@ public class Logic {
     }
     public static class Executor extends User implements CopyCat<Executor> {
         public static FeedContainer<Executor> container = new FeedContainer<>();
-        private Description description;
         private Schedule schedule;
         private Integer price;
         private Rating rating;
@@ -263,11 +248,6 @@ public class Logic {
 
 
 
-
-        public void setDescription(Description description) {
-            this.description = description;
-        }
-
         public void setSchedule(Schedule schedule) {
             this.schedule = schedule;
         }
@@ -276,9 +256,6 @@ public class Logic {
             this.price = price;
         }
 
-        public void setPhoto(Photo photo) {
-            this.photo = photo;
-        }
 
         public void setRating(Rating rating) {
             this.rating = rating;
@@ -292,13 +269,8 @@ public class Logic {
             this.location = location;
         }
 
-
         public Side getPreferredSide() {
             return preferredSide;
-        }
-
-        public Photo getPhoto() {
-            return photo;
         }
 
         public Rating getRating() {
@@ -315,10 +287,6 @@ public class Logic {
 
         public Location getLocation() {
             return location;
-        }
-
-        public Description getDescription() {
-            return description;
         }
 
     }
@@ -521,6 +489,14 @@ public class Logic {
     }
 
 
+    enum DescriptionType{
+        STRING,
+        NUMBER,
+        DATE,
+        CHECKBOX,
+        PHOTO,
+        SCHEDULE
+    }
     public static class DescriptionCharacteristicField{
         public String title;
         public String body;
@@ -529,42 +505,49 @@ public class Logic {
         public Boolean shouldBeExtended;
         public Boolean changeable;
 
+        public DescriptionType type;
+
         public static List<Class<?>> classToCheckList = List.of(Logic.Executor.class, Logic.User.class, Logic.Schedule.class, Logic.Description.class, Logic.Photo.class);
 
 
-        public DescriptionCharacteristicField(String title, String body, String textFieldTitle) {
+        public DescriptionCharacteristicField(String title, String body, String textFieldTitle, DescriptionType type) {
             this.title = title;
             this.body = body;
             this.textFieldTitle = textFieldTitle;
             this.restrictionValue = 40;
             this.shouldBeExtended = false;
             this.changeable = true;
+            this.type = type;
         }
-        public DescriptionCharacteristicField(String title, String body, String textFieldTitle, Boolean changeable) {
+        public DescriptionCharacteristicField(String title, String body, String textFieldTitle, Boolean changeable, DescriptionType type) {
             this.title = title;
             this.body = body;
             this.textFieldTitle = textFieldTitle;
             this.restrictionValue = 40;
             this.shouldBeExtended = false;
             this.changeable = changeable;
+            this.type = type;
         }
-        public DescriptionCharacteristicField(String title, String body, String textFieldTitle, Integer restrictionValue) {
+        public DescriptionCharacteristicField(String title, String body, String textFieldTitle, Integer restrictionValue, DescriptionType type) {
             this.title = title;
             this.body = body;
             this.textFieldTitle = textFieldTitle;
             this.restrictionValue = restrictionValue;
             this.shouldBeExtended = (restrictionValue >= 100);
             this.changeable = true;
+            this.type = type;
         }
-        public DescriptionCharacteristicField(String title, String body, String textFieldTitle, Integer restrictionValue, Boolean changeable) {
+        public DescriptionCharacteristicField(String title, String body, String textFieldTitle, Integer restrictionValue, Boolean changeable, DescriptionType type) {
             this.title = title;
             this.body = body;
             this.textFieldTitle = textFieldTitle;
             this.restrictionValue = restrictionValue;
             this.shouldBeExtended = (restrictionValue >= 100);
             this.changeable = changeable;
+            this.type = type;
         }
-        public static Object getObject(String name, Executor executor) {
+        public static Object getObject(String name, User executor) {
+
             try {
                 var field = Logic.Executor.class.getDeclaredField(name);
                 field.setAccessible(true);
@@ -583,15 +566,15 @@ public class Logic {
                         try {
                             var field = Logic.Schedule.class.getDeclaredField(name);
                             field.setAccessible(true);
-                            return executor.getSchedule();
+                            return ((Executor) executor).getSchedule();
                         } catch (Exception error3) {
                             try{
                                 var field = Logic.User.class.getDeclaredField(name);
                                 field.setAccessible(true);
-                                return (User)executor;
+                                return executor;
                             }
                             catch (Exception error4) {
-                                System.out.println("Exception in getObject: " + error3.getMessage() + " " + name);
+                                System.out.println("Exception in getObject: " + error4.getMessage() + " " + name);
                             }
                         }
                     }
@@ -599,7 +582,7 @@ public class Logic {
             }
             return null;
         }
-        public static Field getField(String name, Executor executor) {
+        public static Field getField(String name, User executor) {
             for (Class<?> me : classToCheckList) {
                 try {
                     var field = me.getDeclaredField(name);
@@ -613,7 +596,7 @@ public class Logic {
             assert(false);
             return null;
         }
-        public static Object getFieldValue(String name, Executor executor) {
+        public static Object getFieldValue(String name, User executor) {
             try {
                 var field = Logic.Executor.class.getDeclaredField(name);
                 field.setAccessible(true);
@@ -632,7 +615,7 @@ public class Logic {
                         try {
                             var field = Logic.Schedule.class.getDeclaredField(name);
                             field.setAccessible(true);
-                            return field.get(executor.getSchedule());
+                            return field.get(((Executor)executor).getSchedule());
                         } catch (Exception error3) {
                             try{
                                 var field = Logic.User.class.getDeclaredField(name);
@@ -654,35 +637,49 @@ public class Logic {
     public static Map<String, DescriptionCharacteristicField> descriptionMap = new HashMap<>();
     public static Map<String, Object> descriptionStates = new HashMap<>();
 
+    public static List<String> descriptionNames = new ArrayList<>();
+
     static{
         descriptionMap.put("name",
                 new DescriptionCharacteristicField("Tell us your legal name",
                                                         "Note that this name should match your document information",
-                                                        "What's your name:", true));
+                                                        "What's your name:", true, DescriptionType.STRING));
+        descriptionNames.add("name");
         descriptionMap.put("aboutYou",
                 new DescriptionCharacteristicField("About you",
                         "The information you share will be used across our service to help other users get to know you",
-                        "Write about yourself:", 400));
+                        "Write about yourself:", 400, DescriptionType.STRING));
+        descriptionNames.add("aboutYou");
+
         descriptionMap.put("dateBirth",
                 new DescriptionCharacteristicField("Your date birth",
                         "You won't be able to change it after",
-                        "Birth date:", 40,  false));
+                        "Birth date:", 40,  false, DescriptionType.DATE));
+        descriptionNames.add("dateBirth");
+
         descriptionMap.put("sex",
                 new DescriptionCharacteristicField("Your sex",
                         "You won't be able to change it after",
-                        "Sex:", 40,  false));
+                        "Sex:", 40,  false, DescriptionType.CHECKBOX));
+        descriptionNames.add("sex");
+
         descriptionMap.put("childNumber",
                 new DescriptionCharacteristicField("Do you have children?",
                         "The information you share will be used across our service to help others get to know you and make our service more efficient",
-                        "Number of children:", 40,  true));
+                        "Number of children:", 40,  true, DescriptionType.NUMBER));
+        descriptionNames.add("childNumber");
+
         descriptionMap.put("photoURL",
                 new DescriptionCharacteristicField("Choose your photo",
                         "By providing your photo, we can create a more personalized and engaging experience tailored specifically to you. Also that enables other users to identify you more easily. This fosters a sense of community and encourages meaningful interactions among our users.",
-                        "Your photo:", 0, false));
-            descriptionMap.put("scheduleMap",
+                        "Your photo:", 0, false, DescriptionType.PHOTO));
+        descriptionNames.add("photoURL");
+
+        descriptionMap.put("scheduleMap",
                     new DescriptionCharacteristicField("Choose your schedule",
                             "You should select your free time, so that we will be able to find client for you",
-                            "Skip", true));
+                            "Skip", true, DescriptionType.SCHEDULE));
+        descriptionNames.add("scheduleMap");
 
     }
 
