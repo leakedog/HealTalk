@@ -33,6 +33,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import android.content.Context;
 
+import java.util.Objects;
+
 public class AuthModel {
     public static FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private static BeginSignInRequest signInRequest;
@@ -97,39 +99,31 @@ public class AuthModel {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             System.out.println("Waiting");
-            currentUser.getIdToken(true)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            token = task.getResult().getToken();
-                            // Use the token as needed
-                            AuthViewModel.handleToken();
-                        } else {
-                            // Token retrieval failed, handle the error
-                            Exception exception = task.getException();
-                            // Handle the exception accordingly
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            AuthViewModel.handleTokenError(error);
-                        }
-                    });
+            token = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
+            AuthViewModel.handleToken();
         } else {
             System.out.println("Error");
 
         }
     }
     public static void startApplication() {
-        AuthViewModel.showLoading();
-
         if (mAuth.getCurrentUser() != null) {
+            System.out.println("WTFF");
             AuthViewModel.isWaiting = true;
+            AuthViewModel.isWaitingLoading = true;
             getCurrentUserToken(null);
+            AuthViewModel.showLoading();
         } else {
-
             AuthViewModel.showGreeting();
         }
 
     }
 
     public static Logic.User getCurrentUser() {
+        System.out.println("DEBUG");
+        System.out.println(PublicKey.keys);
+        System.out.println(token);
+        System.out.println(PublicKey.getPublicId(token));
         //TODO find really who i am
         return Logic.User.container.get(PublicKey.getPublicId(token));
     }

@@ -11,6 +11,8 @@ public class AuthViewModel {
 
 
     public static boolean isWaiting = false;
+    public static boolean isWaitingLoading = false;
+
     static void showGreeting() {
         navController.navigate("greeting");
     }
@@ -79,7 +81,7 @@ public class AuthViewModel {
         }
     }
 
-    public static void loadToken(String currentRoute) {
+    public static void loadToken() {
         if (AuthModel.token == null) {
             isWaiting = true;
             AuthModel.getCurrentUserToken(null);
@@ -118,7 +120,21 @@ public class AuthViewModel {
     }
 
     public static void startLogged() {
-        navController.navigate("LoggedApp"); /// loggedApp
+        if (!isWaitingLoading && !isWaiting)
+            navController.navigate("LoggedApp"); /// loggedApp
 
+    }
+
+    public static void reactLoaded() {
+        if (isWaitingLoading) {
+
+            System.out.println("WW");
+            isWaitingLoading = false;
+            startLogged();
+        }
+    }
+
+    public static void handleError() {
+        navController.navigate("error");
     }
 }

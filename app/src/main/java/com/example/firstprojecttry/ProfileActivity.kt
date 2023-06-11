@@ -61,11 +61,14 @@ import coil.compose.AsyncImage
 import com.example.firstprojecttry.Logic.Executor
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.KeyboardType
+import com.example.firstprojecttry.Logic.Client
 import com.example.firstprojecttry.Logic.DescriptionCharacteristicField
 import com.example.firstprojecttry.Logic.DescriptionCharacteristicField.getField
 import com.example.firstprojecttry.Logic.DescriptionCharacteristicField.getFieldValue
+import com.example.firstprojecttry.Logic.clientDescriptionNames
 import com.example.firstprojecttry.Logic.descriptionMap
 import com.example.firstprojecttry.Logic.descriptionStates
+import com.example.firstprojecttry.Logic.executorDescriptionNames
 import kotlinx.coroutines.launch
 import java.lang.Error
 import java.util.Date
@@ -170,14 +173,14 @@ fun ScheduleGrid(state: MutableState<HashMap<String, MutableState<Boolean>>>, ch
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DescriptionItem(title: String, name: String, executor: MutableState<Executor>, last: Boolean = false, changeable: Boolean = true) {
+fun DescriptionItem(title: String, name: String, fieldValue: String?, last: Boolean = false, changeable: Boolean = true) {
     var textValue = "";
     var type = descriptionMap[name]!!.type
-    println("Field " + name + " " + getField(name, executor.value))
-    if (getFieldValue(name, executor.value) != null) {
-        textValue = getFieldValue(name, executor.value).toString();
+    println(type.name);
+    println(fieldValue)
+    if (fieldValue != null) {
+        textValue = fieldValue
     }
 
     var text = rememberSaveable { mutableStateOf(textValue) }
@@ -518,24 +521,40 @@ fun AvailabilityBlock(executor : MutableState<Executor>, changeable: Boolean = t
 @Preview
 @Composable
 fun PreviewProfilePage() {
-    var executor = remember{ mutableStateOf(Logic.Executor(
-        4,
-        "Elizabeth Mitchi",
+    var type: Int = try{
+        var value = AuthViewModel.getCurrentUser() as Executor
 
-        Logic.Description(),
-        Logic.Schedule(),
-        30,
-        Logic.Photo(),
-        Logic.Side.EXECUTORHOME,
-        Logic.Location(50.065081, 19.923790)
-    )) }
-    ProfilePage(executor, MaterialTheme)
+        1;
+    } catch (e : Exception) {
+        try {
+            val value = AuthViewModel.getCurrentUser() as Client
+
+            0;
+        }catch (e2 : Exception) {
+            println(e.message)
+            AuthViewModel.handleError()
+            2;
+        }
+    }
+    if (type.equals(0)) {
+        val user = remember {
+            mutableStateOf(AuthViewModel.getCurrentUser() as Client)
+        }
+        ProfileClientPage(client = user)
+    } else if (type.equals(1)){
+        val value = AuthViewModel.getCurrentUser() as Executor
+        val user = remember {
+            mutableStateOf(value)
+        }
+        ProfileExecutorPage(executor = user)
+    }
 }
 
 
 @Composable
-fun ExecutorCard(executor: MutableState<Executor>, theme: MaterialTheme = MaterialTheme, onGoBack : () -> Unit = {}, fromChat: Boolean = false ) {
+fun ExecutorCard(executor: MutableState<Executor>, theme: MaterialTheme = MaterialTheme, onGoBack : () -> Unit = {}, fromChat: Boolean = false) {
 
+    var listNames = clientDescriptionNames;
 
     if (executor.value.photo.photoURL == null) {
         executor.value.photo.photoURL = ""
@@ -638,11 +657,11 @@ fun ExecutorCard(executor: MutableState<Executor>, theme: MaterialTheme = Materi
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        DescriptionItem(title = "Legal name", name = "name", executor = executor, changeable = false)
-                        DescriptionItem(title = "About him", name = "aboutYou", executor = executor, changeable = false)
-                        DescriptionItem(title = "Number of children", name = "childNumber", executor = executor, changeable = false)
-                        DescriptionItem(title = "Sex", name = "sex", executor = executor, changeable = false)
-                        DescriptionItem(title = "Date of birth", name = "dateBirth", executor = executor, changeable = false)
+                        for (name in listNames) {
+                            if (name != "photoURL" && name != "scheduleMap") {
+                                DescriptionItem(title = descriptionMap[name]!!.descriptionTitle, name = name, fieldValue = getFieldValue(name, executor.value)?.toString(), changeable = false)
+                            }
+                        }
                     }
                 }
             )
@@ -655,9 +674,9 @@ fun ExecutorCard(executor: MutableState<Executor>, theme: MaterialTheme = Materi
 
 
 @Composable
-fun ProfilePage(executor: MutableState<Executor>, theme: MaterialTheme = MaterialTheme) {
+fun ProfileExecutorPage(executor: MutableState<Executor>, theme: MaterialTheme = MaterialTheme) {
     descriptionStates.clear();
-
+    var listNames = executorDescriptionNames;
     if (executor.value.photo.photoURL == null) {
         executor.value.photo.photoURL = ""
     }
@@ -769,16 +788,145 @@ fun ProfilePage(executor: MutableState<Executor>, theme: MaterialTheme = Materia
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        DescriptionItem(title = "Legal name", name = "name", executor = executor)
-                        DescriptionItem(title = "About you", name = "aboutYou", executor = executor)
-                        DescriptionItem(title = "Number of children", name = "childNumber", executor = executor)
-                        DescriptionItem(title = "Sex", name = "sex", executor = executor)
-                        DescriptionItem(title = "Date of birth", name = "dateBirth", executor = executor)
-
+                        for (name in listNames) {
+                            if (name != "photoURL" && name != "scheduleMap") {
+                                DescriptionItem(title = descriptionMap[name]!!.descriptionTitle, name = name, fieldValue = getFieldValue(name, executor.value)?.toString())
+                            }
+                        }
                     }
                 }
             )
             AvailabilityBlock(executor = executor)
+        }
+    }
+
+}
+
+
+
+@Composable
+fun ProfileClientPage(client: MutableState<Logic.Client>, theme: MaterialTheme = MaterialTheme) {
+    descriptionStates.clear();
+    var listNames = executorDescriptionNames;
+    if (client.value.photo.photoURL == null) {
+        client.value.photo.photoURL = ""
+    }
+    var photoURL = rememberSaveable {mutableStateOf(client.value.photo.photoURL)}
+
+    var imageUriState = remember{mutableStateOf<Uri?> (null)}
+    val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        imageUriState.value = uri
+        ProfileViewModel.tryUploadImage(photoURL, imageUriState)
+    }
+
+    Scaffold(
+        bottomBar = {
+            BottomBar()
+        }
+    ) {
+            paddingValues ->
+        Column(
+            Modifier
+                .background(Color.White)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(paddingValues)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 30.dp),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Edit Profile",
+                    style = MaterialTheme.typography.displayMedium,
+                )
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
+                    Surface(
+                        onClick = {
+                            descriptionStates["photoURL"] = photoURL.value;
+                            ProfileViewModel.uploadUser()
+                        },
+
+                        ) {
+                        Text(
+                            text = "Save",
+                            fontSize = 20.sp,
+                            modifier = Modifier.padding(end = 20.dp)
+                        )
+                    }
+                }
+            }
+
+            Box(modifier = Modifier
+                .fillMaxWidth(),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top,
+                    modifier = Modifier.padding(bottom = 40.dp),
+                ) {
+                    Surface(
+                        onClick = {
+                            getContent.launch("image/*")
+                        },
+                        modifier = Modifier.graphicsLayer {
+                            clip = true
+                            shape = CircleShape
+                            translationY = 30.dp.toPx()
+                        }
+                    ) {
+                        LoadImageFromUrlExample(
+                            imageUrl = photoURL.value,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(150.dp)
+                                .align(Alignment.Start)
+                                .background(Color.LightGray)
+
+                        )
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = colorResource(id = R.color.purple_200),
+                        onClick = {
+                            getContent.launch("image/*")
+
+                        }
+
+                    ) {
+                        Row() {
+
+                            Icon(painterResource(R.drawable.photo_icon_foreground), "Change photo UI", modifier = Modifier
+                                .padding(start = 10.dp)
+                                .width(20.dp))
+                            Text(text = "Change", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(start = 5.dp, end = 10.dp))
+                        }
+                    }
+                }
+            }
+            ListItem(
+                headlineContent = {
+                    Text(
+                        "Personal information",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                },
+                supportingContent = {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        for (name in listNames) {
+                            if (name != "photoURL" && name != "scheduleMap") {
+                                DescriptionItem(title = descriptionMap[name]!!.descriptionTitle, name = name, fieldValue = getFieldValue(name, client.value)?.toString())
+                            }
+                        }
+                    }
+                }
+            )
         }
     }
 

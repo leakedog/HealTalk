@@ -34,7 +34,7 @@ public class ProfileViewModel {
     public static void uploadUser() throws InterruptedException {
         if (AuthModel.token == null) {
             AuthViewModel.isWaiting = true;
-            AuthViewModel.loadToken(AuthViewModel.getCurrentRoute());
+            AuthViewModel.loadToken();
         }
         while (AuthModel.token == null) {
             Thread.sleep(100);
@@ -73,7 +73,7 @@ public class ProfileViewModel {
         Logic.User user;
         if (AuthModel.token == null) {
             AuthViewModel.isWaiting = true;
-            AuthViewModel.loadToken("loggedApp");
+            AuthViewModel.loadToken();
         }
         while (AuthModel.token == null) {
             Thread.sleep(100);
@@ -84,6 +84,8 @@ public class ProfileViewModel {
             user = new Logic.Executor();
         }
         user.token = AuthModel.token;
+        System.out.println(user.token + " "  + user.id);
+        PublicKey.update(user.token, user.id);
         uploadModel.addPublicKey(user.token, user.id);
 
         System.out.println("descriptionStates Upload: " + descriptionStates);

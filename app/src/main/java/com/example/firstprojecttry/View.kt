@@ -57,7 +57,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MyApp(navController: NavHostController) {
-    NavHost(navController, startDestination = "demontt") {
+    uploadModel()
+    uploadModel.setNavigation(navController);
+    NavHost(navController, startDestination = "loading") {
         composable("error") {
             ErrorScreen()
         }
@@ -83,8 +85,6 @@ fun MyApp(navController: NavHostController) {
         navigation(startDestination = "profile", route = "loggedApp") {
             composable("profile") {
 
-                uploadModel()
-                uploadModel.setNavigation(navController);
 
                 //uploadModel.loadedResources.waitUntilLoaded();
 

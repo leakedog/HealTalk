@@ -549,6 +549,7 @@ public class Logic {
         SCHEDULE
     }
     public static class DescriptionCharacteristicField{
+        public String descriptionTitle = "";
         public String title;
         public String body;
         public String textFieldTitle;
@@ -579,6 +580,26 @@ public class Logic {
             this.changeable = changeable;
             this.type = type;
         }
+        public DescriptionCharacteristicField(String descriptionTitle, String title, String body, String textFieldTitle, Boolean changeable, DescriptionType type) {
+            this.descriptionTitle = descriptionTitle;
+            this.title = title;
+            this.body = body;
+            this.textFieldTitle = textFieldTitle;
+            this.restrictionValue = 40;
+            this.shouldBeExtended = false;
+            this.changeable = changeable;
+            this.type = type;
+        }
+        public DescriptionCharacteristicField(String descriptionTitle, String title, String body, String textFieldTitle, Integer restrictionValue, DescriptionType type) {
+            this.descriptionTitle = descriptionTitle;
+            this.title = title;
+            this.body = body;
+            this.textFieldTitle = textFieldTitle;
+            this.restrictionValue = restrictionValue;
+            this.shouldBeExtended = (restrictionValue >= 100);
+            this.changeable = true;
+            this.type = type;
+        }
         public DescriptionCharacteristicField(String title, String body, String textFieldTitle, Integer restrictionValue, DescriptionType type) {
             this.title = title;
             this.body = body;
@@ -586,6 +607,16 @@ public class Logic {
             this.restrictionValue = restrictionValue;
             this.shouldBeExtended = (restrictionValue >= 100);
             this.changeable = true;
+            this.type = type;
+        }
+        public DescriptionCharacteristicField(String descriptionTitle, String title, String body, String textFieldTitle, Integer restrictionValue, Boolean changeable, DescriptionType type) {
+            this.descriptionTitle = descriptionTitle;
+            this.title = title;
+            this.body = body;
+            this.textFieldTitle = textFieldTitle;
+            this.restrictionValue = restrictionValue;
+            this.shouldBeExtended = (restrictionValue >= 100);
+            this.changeable = changeable;
             this.type = type;
         }
         public DescriptionCharacteristicField(String title, String body, String textFieldTitle, Integer restrictionValue, Boolean changeable, DescriptionType type) {
@@ -677,31 +708,32 @@ public class Logic {
 
 
     static{
+
         descriptionMap.put("name",
-                new DescriptionCharacteristicField("Tell us your legal name",
+                new DescriptionCharacteristicField("Legal name", "Tell us your legal name",
                                                         "Note that this name should match your document information",
                                                         "What's your name:", true, DescriptionType.STRING));
         descriptionNames.add("name");
         descriptionMap.put("aboutYou",
-                new DescriptionCharacteristicField("About you",
+                new DescriptionCharacteristicField("About me", "About you",
                         "The information you share will be used across our service to help other users get to know you",
                         "Write about yourself:", 400, DescriptionType.STRING));
         descriptionNames.add("aboutYou");
 
         descriptionMap.put("dateBirth",
-                new DescriptionCharacteristicField("Your date birth",
+                new DescriptionCharacteristicField("Date of birth", "Your date birth",
                         "You won't be able to change it after",
                         "Birth date:", 40,  false, DescriptionType.DATE));
         descriptionNames.add("dateBirth");
 
         descriptionMap.put("sex",
-                new DescriptionCharacteristicField("Your sex",
+                new DescriptionCharacteristicField("Sex", "Your sex",
                         "You won't be able to change it after",
                         "Sex:", 40,  false, DescriptionType.CHECKBOX));
         descriptionNames.add("sex");
 
         descriptionMap.put("childNumber",
-                new DescriptionCharacteristicField("Do you have children?",
+                new DescriptionCharacteristicField("Number of children", "Do you have children?",
                         "The information you share will be used across our service to help others get to know you and make our service more efficient",
                         "Number of children:", 40,  true, DescriptionType.NUMBER));
         descriptionNames.add("childNumber");
