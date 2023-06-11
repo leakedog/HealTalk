@@ -142,7 +142,7 @@ public class uploadModel {
     /// a database of (public_key, token), thus we just take this token and if it is actually the same than we good, otherwise we throw an error
     /// if everything okay, we know that our key on our data_base is public key, thus we can reference to it. DONE.
     protected static void addExecutor(Executor person) {
-       mDatabase.child("users").child("executors").child(person.getId().toString()).setValue(person).addOnCompleteListener(insertionReaction("Executor")).addOnFailureListener(failureReaction("Executor"));
+       mDatabase.child("users").child("executors").child("E"+person.getId().toString()).setValue(person).addOnCompleteListener(insertionReaction("Executor")).addOnFailureListener(failureReaction("Executor"));
     }
     protected static void addChat(Messenger.Chat chat){
        // System.out.println("TRHOW MY FUNCTION");
@@ -244,7 +244,6 @@ public class uploadModel {
                     for (Map.Entry<String, Executor> executor : list.entrySet())
                     {
                         System.out.println("Found client " + executor.getValue().getName() + " hah " + executor.getValue().getPhoto().getPhotoURL() + executor.getValue().getId().toString());
-
                         Executor.container.update(executor.getValue().getId(), executor.getValue());
                         User.container.update(executor.getValue().getId(), executor.getValue());
                     }
