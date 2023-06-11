@@ -15,15 +15,3 @@ fun getExecutor(): Logic.Executor{
         )
 
 }
-fun getClient(): Logic.Client {
-    return Logic.Client(
-            "Vasya",
-            Logic.Description(),
-            1,
-            Logic.Photo("https://firebasestorage.googleapis.com/v0/b/healtalk-7ab6c.appspot.com/o/images%2F2c5de8d8-0cf3-4b74-a9b1-d2126bb7f580?alt=media&token=1ed6aa11-ef0a-4cb8-b072-ddc87102ba66"),
-            Logic.Side.EXECUTORHOME,
-            "fuk",
-            "35162.325"
-        )
-
-}

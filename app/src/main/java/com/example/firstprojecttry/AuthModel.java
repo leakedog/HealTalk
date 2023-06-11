@@ -36,10 +36,8 @@ import android.content.Context;
 public class AuthModel {
     public static FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private static BeginSignInRequest signInRequest;
+    public static String token = null;
 
-    private static SignInClient oneTapClient;
-    private static final int REQ_ONE_TAP = 2;  // Can be any integer unique to the Activity.
-    private boolean showOneTapUI = true;
     public static void login(String email, String password, MutableState<Boolean> error) {
         // Assuming you're using Firebase Authentication
 
@@ -71,22 +69,7 @@ public class AuthModel {
             AuthViewModel.handleSuccessfulLogin();
         }
     }
-    public static void buildGmail() {
-        if (signInRequest != null)
-            return;
-        Context context = getApplicationContext();
-        String text = context.getString(R.string.default_web_client_id);
-        oneTapClient = Identity.getSignInClient(context);
-        signInRequest = BeginSignInRequest.builder()
-                .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                        .setSupported(true)
-                        // Your server's client ID, not your Android client ID.
-                        .setServerClientId(text)
-                        // Only show accounts previously used to sign in.
-                        .setFilterByAuthorizedAccounts(false)
-                        .build()).build();
 
-    }
 
     public static void register(String email, String password, MutableState<Boolean> error) {
         try {
@@ -117,9 +100,9 @@ public class AuthModel {
             currentUser.getIdToken(true)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            String token = task.getResult().getToken();
+                            token = task.getResult().getToken();
                             // Use the token as needed
-                            AuthViewModel.handleToken(token);
+                            AuthViewModel.handleToken();
                         } else {
                             // Token retrieval failed, handle the error
                             Exception exception = task.getException();
@@ -135,7 +118,9 @@ public class AuthModel {
     }
     public static void startApplication() {
         AuthViewModel.showLoading();
+
         if (mAuth.getCurrentUser() != null) {
+            AuthViewModel.isWaiting = true;
             getCurrentUserToken(null);
         } else {
 
@@ -146,6 +131,6 @@ public class AuthModel {
 
     public static Logic.User getCurrentUser() {
         //TODO find really who i am
-        return Logic.Executor.container.getFirst();
+        return Logic.User.container.get(PublicKey.getPublicId(token));
     }
 }

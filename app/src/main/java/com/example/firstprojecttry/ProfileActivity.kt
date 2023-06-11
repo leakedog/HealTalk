@@ -1,8 +1,6 @@
 package com.example.firstprojecttry
 
-import android.annotation.SuppressLint
 import android.net.Uri
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
@@ -23,9 +21,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -52,9 +50,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.TextField
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.text.style.TextAlign
@@ -64,19 +60,16 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.firstprojecttry.Logic.Executor
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.input.KeyboardType
 import com.example.firstprojecttry.Logic.DescriptionCharacteristicField
 import com.example.firstprojecttry.Logic.DescriptionCharacteristicField.getField
 import com.example.firstprojecttry.Logic.DescriptionCharacteristicField.getFieldValue
-import com.example.firstprojecttry.Logic.DescriptionCharacteristicField.getObject
 import com.example.firstprojecttry.Logic.descriptionMap
 import com.example.firstprojecttry.Logic.descriptionStates
 import kotlinx.coroutines.launch
-import java.time.DayOfWeek
-import java.time.Instant
-import java.time.ZoneId
-import java.util.Calendar
-import java.util.TimeZone
-
+import java.lang.Error
+import java.util.Date
+import java.text.SimpleDateFormat
 
 @Composable
 fun LoadImageFromUrlExample(imageUrl: String, contentScale: ContentScale = ContentScale.None, modifier: Modifier = Modifier) {
@@ -181,6 +174,7 @@ fun ScheduleGrid(state: MutableState<HashMap<String, MutableState<Boolean>>>, ch
 @Composable
 fun DescriptionItem(title: String, name: String, executor: MutableState<Executor>, last: Boolean = false, changeable: Boolean = true) {
     var textValue = "";
+    var type = descriptionMap[name]!!.type
     println("Field " + name + " " + getField(name, executor.value))
     if (getFieldValue(name, executor.value) != null) {
         textValue = getFieldValue(name, executor.value).toString();
@@ -207,7 +201,12 @@ fun DescriptionItem(title: String, name: String, executor: MutableState<Executor
 
                 supportingContent = {
                     Text(
-                        text = text.value,
+                        text = if (type.name == "DATE")  {
+                            val date = Date(textValue.toLong())
+                            val dateFormat = SimpleDateFormat("MM-DD-YYYY") // Define the desired date format
+                            dateFormat.format(date)
+                        }
+                            else { text.value },
                         color = colorResource(id = R.color.purple_500)
                     )
                 },
@@ -229,25 +228,62 @@ fun DescriptionItem(title: String, name: String, executor: MutableState<Executor
         }
     }
     if (selected.value) {
+
         CharacteristicChangeSheet(
             descriptionField = Logic.descriptionMap[name]!!,
             fieldBody = text,
             selected = selected,
             onClickSave = {
                 descriptionStates[name] = text.value
-            })
+            },
+            type = type
+        )
     }
 }
 
 
+fun handleStringInput(
+    fieldBody: String,
+    changeError: (Boolean) -> (Unit) = {},
+    type: Logic.DescriptionType,
+    restrictionSize: Int,
+    symbolsCount: Int,
+    onError : (Boolean) -> (Unit) = {}
+) {
+    changeError(false);
+    onError(true);
+    if (type == Logic.DescriptionType.STRING) {
+        changeError(symbolsCount > restrictionSize)
+        onError(symbolsCount <= restrictionSize);
+    } else {
+        if ( fieldBody  == "" || (fieldBody.length > 1 && fieldBody[0] == '0')) {
+            changeError(true);
+            onError(false);
+
+        }
+        try{
+            val x =  fieldBody.toInt()
+            if (x > restrictionSize) {
+                changeError(true);
+                onError(false);
+
+            }
+        } catch (e : Exception) {
+            changeError(true);
+            onError(false);
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacteristicChangeSheet(
-    descriptionField : Logic.DescriptionCharacteristicField,
+    descriptionField: DescriptionCharacteristicField,
     fieldBody: MutableState<String>,
     selected: MutableState<Boolean>,
     singleLine: Boolean = true,
     onClickSave: () -> Unit,
+    type: Logic.DescriptionType,
 ) {
     var restrictionSize = descriptionField.restrictionValue
     val scope = rememberCoroutineScope()
@@ -261,29 +297,11 @@ fun CharacteristicChangeSheet(
             },
             sheetState = bottomSheetState
         ) {
-            var text by rememberSaveable { mutableStateOf("") }
-            var erorr by rememberSaveable { mutableStateOf(false) }
+            var (erorr, changeError) = rememberSaveable{ mutableStateOf(false) }
             var symbolsCount by rememberSaveable { mutableIntStateOf(fieldBody.value.length) }
             Column(
                 modifier = Modifier.padding(bottom = 40.dp)
             ) {
-                /*
-                IconButton(
-                    onClick = {
-                        scope.launch { bottomSheetState.hide() }.invokeOnCompletion {
-                            if (!bottomSheetState.isVisible) {
-                                selected.value = false
-                            }
-                        }
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "UI Icon Close Buttom Sheet"
-                    )
-                }
-
-                 */
                 Column(
                     modifier = Modifier.padding(start = 20.dp, end = 20.dp)
                 ) {
@@ -296,25 +314,52 @@ fun CharacteristicChangeSheet(
                         fontSize = 20.sp,
                         color = Color.Gray
                     );
+
                     TextField(
                         value = fieldBody.value,
                         onValueChange = {
                             symbolsCount = it.length
                             fieldBody.value = it
-                            erorr = symbolsCount > restrictionSize
+                            erorr = false;
+
+                           handleStringInput(fieldBody.value, changeError, type, restrictionSize, symbolsCount)
                         },
                         label = {
                             Text(descriptionField.textFieldTitle);
                         },
-                        singleLine = singleLine,
+                        singleLine = true,
                         isError = erorr,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 35.dp),
                         supportingText = {
-                            Text(            modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.End, text="$symbolsCount/$restrictionSize characters")
-                        }
+                            if (type == Logic.DescriptionType.STRING) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.End, text = "$symbolsCount/$restrictionSize characters"
+                                )
+                            } else {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.End,
+                                    text = if (erorr){
+                                        "Incorrect input"
+                                    } else {
+                                        ""
+                                    }
+                                )
+                            }
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            autoCorrect = false,
+                            keyboardType =
+                            if (type == Logic.DescriptionType.STRING){
+                                KeyboardType.Text
+                            } else {
+                                KeyboardType.Number
+                            }
+
+                        )
                     )
                 }
                 Divider(
@@ -469,138 +514,6 @@ fun AvailabilityBlock(executor : MutableState<Executor>, changeable: Boolean = t
     }
 }
 
-@Composable
-fun ProfilePage(executor: MutableState<Executor>, theme: MaterialTheme) {
-
-    if (executor.value.photo.photoURL == null) {
-        executor.value.photo.photoURL = ""
-    }
-    var photoURL = rememberSaveable {mutableStateOf(executor.value.photo.photoURL)}
-
-    var imageUriState = remember{mutableStateOf<Uri?> (null)}
-    val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        imageUriState.value = uri
-        ProfileViewModel.tryUploadImage(photoURL, imageUriState)
-    }
-
-    Scaffold(
-        bottomBar = {
-            BottomBar()
-        }
-    ) {
-        paddingValues ->
-        Column(
-            Modifier
-                .background(Color.White)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(paddingValues)) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 30.dp)
-                    .size(45.dp),
-                verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
-                    Surface(
-                        onClick = {
-                            descriptionStates["photoURL"] = photoURL.value;
-                            ProfileViewModel.uploadUser(executor.value)
-                        },
-
-                        ) {
-                        Text(
-                            text = "Save",
-                            fontSize = 20.sp,
-                            modifier = Modifier.padding(end = 20.dp)
-                        )
-                    }
-                }
-            }
-            /*
-            Text(
-                text = "Edit Profile",
-                style = MaterialTheme.typography.displayMedium,
-                modifier = Modifier.padding(start = 20.dp, top = 15.dp)
-            )
-             */
-            Box(modifier = Modifier
-                .fillMaxWidth(),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Top,
-                    modifier = Modifier.padding(bottom = 40.dp),
-                ) {
-                    Surface(
-                        onClick = {
-                            getContent.launch("image/*")
-                        },
-                        modifier = Modifier.graphicsLayer {
-                            clip = true
-                            shape = CircleShape
-                            translationY = 30.dp.toPx()
-                        }
-                    ) {
-                        LoadImageFromUrlExample(
-                            imageUrl = photoURL.value,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(150.dp)
-                                .align(Alignment.Start)
-
-                        )
-                    }
-                    Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        color = colorResource(id = R.color.purple_200),
-                        onClick = {
-                            getContent.launch("image/*")
-
-                        }
-
-                    ) {
-                        Row() {
-
-                            Icon(painterResource(R.drawable.photo_icon_foreground), "Change photo UI", modifier = Modifier
-                                .padding(start = 10.dp)
-                                .width(20.dp))
-                            Text(text = "Change", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(start = 5.dp, end = 10.dp))
-                        }
-                    }
-                }
-            }
-            ListItem(
-                headlineContent = {
-                    Text(
-                        "Personal information",
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                },
-                supportingContent = {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        DescriptionItem(title = "Legal name", name = "name", executor = executor)
-                        DescriptionItem(title = "About you", name = "aboutYou", executor = executor)
-                        DescriptionItem(title = "Number of children", name = "childNumber", executor = executor)
-                        DescriptionItem(title = "Sex", name = "sex", executor = executor)
-
-                    }
-                }
-            )
-            AvailabilityBlock(executor = executor)
-
-
-        }
-    }
-
-}
-
 
 @Preview
 @Composable
@@ -619,45 +532,10 @@ fun PreviewProfilePage() {
     ProfilePage(executor, MaterialTheme)
 }
 
-@SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview
-@Composable
-fun PreviewDate() {
-
-    val datePickerState = rememberDatePickerState(
-        selectableDates = object : SelectableDates {
-            // Blocks Sunday and Saturday from being selected.
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val dayOfWeek = Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneId.of("UTC"))
-                        .toLocalDate().dayOfWeek
-                    dayOfWeek != DayOfWeek.SUNDAY && dayOfWeek != DayOfWeek.SATURDAY
-                } else {
-                    val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-                    calendar.timeInMillis = utcTimeMillis
-                    calendar[Calendar.DAY_OF_WEEK] != Calendar.SUNDAY &&
-                            calendar[Calendar.DAY_OF_WEEK] != Calendar.SATURDAY
-                }
-            }
-
-            // Allow selecting dates from year 2023 forward.
-            override fun isSelectableYear(year: Int): Boolean {
-                return year > 2022
-            }
-        }
-    )
-
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        DatePicker(state = datePickerState)
-        Text("Selected date timestamp: ${datePickerState.selectedDateMillis ?: "no selection"}")
-    }
-}
-
-
 
 @Composable
 fun ExecutorCard(executor: MutableState<Executor>, theme: MaterialTheme = MaterialTheme, onGoBack : () -> Unit = {}, fromChat: Boolean = false ) {
+
 
     if (executor.value.photo.photoURL == null) {
         executor.value.photo.photoURL = ""
@@ -713,6 +591,7 @@ fun ExecutorCard(executor: MutableState<Executor>, theme: MaterialTheme = Materi
                     }
                 }
             }
+
             Box(modifier = Modifier
                 .fillMaxWidth(),
                 contentAlignment = Alignment.TopCenter
@@ -763,10 +642,143 @@ fun ExecutorCard(executor: MutableState<Executor>, theme: MaterialTheme = Materi
                         DescriptionItem(title = "About him", name = "aboutYou", executor = executor, changeable = false)
                         DescriptionItem(title = "Number of children", name = "childNumber", executor = executor, changeable = false)
                         DescriptionItem(title = "Sex", name = "sex", executor = executor, changeable = false)
+                        DescriptionItem(title = "Date of birth", name = "dateBirth", executor = executor, changeable = false)
                     }
                 }
             )
             AvailabilityBlock(executor = executor, changeable = false)
+        }
+    }
+
+}
+
+
+
+@Composable
+fun ProfilePage(executor: MutableState<Executor>, theme: MaterialTheme = MaterialTheme) {
+    descriptionStates.clear();
+
+    if (executor.value.photo.photoURL == null) {
+        executor.value.photo.photoURL = ""
+    }
+    var photoURL = rememberSaveable {mutableStateOf(executor.value.photo.photoURL)}
+
+    var imageUriState = remember{mutableStateOf<Uri?> (null)}
+    val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        imageUriState.value = uri
+        ProfileViewModel.tryUploadImage(photoURL, imageUriState)
+    }
+
+    Scaffold(
+        bottomBar = {
+            BottomBar()
+        }
+    ) {
+            paddingValues ->
+        Column(
+            Modifier
+                .background(Color.White)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(paddingValues)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 30.dp),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Edit Profile",
+                    style = MaterialTheme.typography.displayMedium,
+                )
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
+                    Surface(
+                        onClick = {
+                            descriptionStates["photoURL"] = photoURL.value;
+                            ProfileViewModel.uploadUser()
+                        },
+
+                        ) {
+                        Text(
+                            text = "Save",
+                            fontSize = 20.sp,
+                            modifier = Modifier.padding(end = 20.dp)
+                        )
+                    }
+                }
+            }
+
+            Box(modifier = Modifier
+                .fillMaxWidth(),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top,
+                    modifier = Modifier.padding(bottom = 40.dp),
+                ) {
+                    Surface(
+                        onClick = {
+                            getContent.launch("image/*")
+                        },
+                        modifier = Modifier.graphicsLayer {
+                            clip = true
+                            shape = CircleShape
+                            translationY = 30.dp.toPx()
+                        }
+                    ) {
+                        LoadImageFromUrlExample(
+                            imageUrl = photoURL.value,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(150.dp)
+                                .align(Alignment.Start)
+                                .background(Color.LightGray)
+
+                        )
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = colorResource(id = R.color.purple_200),
+                        onClick = {
+                            getContent.launch("image/*")
+
+                        }
+
+                    ) {
+                        Row() {
+
+                            Icon(painterResource(R.drawable.photo_icon_foreground), "Change photo UI", modifier = Modifier
+                                .padding(start = 10.dp)
+                                .width(20.dp))
+                            Text(text = "Change", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(start = 5.dp, end = 10.dp))
+                        }
+                    }
+                }
+            }
+            ListItem(
+                headlineContent = {
+                    Text(
+                        "Personal information",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                },
+                supportingContent = {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        DescriptionItem(title = "Legal name", name = "name", executor = executor)
+                        DescriptionItem(title = "About you", name = "aboutYou", executor = executor)
+                        DescriptionItem(title = "Number of children", name = "childNumber", executor = executor)
+                        DescriptionItem(title = "Sex", name = "sex", executor = executor)
+                        DescriptionItem(title = "Date of birth", name = "dateBirth", executor = executor)
+
+                    }
+                }
+            )
+            AvailabilityBlock(executor = executor)
         }
     }
 

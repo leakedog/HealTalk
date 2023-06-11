@@ -5,9 +5,11 @@ import static com.example.firstprojecttry.Logic.User.container;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 interface CopyCat<T> {
      void copy(T o);
@@ -31,6 +33,15 @@ public class Logic {
 
         protected String name;
 
+        protected int id;
+
+        User() {
+            token = new String();
+            photo = new Photo();
+            description = new Description();
+            name = new String();
+        }
+
         public void copy(User from){
             this.token = from.token;
             this.id = from.id;
@@ -47,7 +58,6 @@ public class Logic {
         public void setToken(){
             this.token = token;
         }
-        protected int id;
         public void setId(int id) {
             this.id = id;
         }
@@ -93,27 +103,23 @@ public class Logic {
     public static class Client extends User implements CopyCat<Client>{
         protected static FeedContainer<Client> container = new FeedContainer<Client>();
 
-        private Integer childrenNumber; /// how many need to be looked after
         private Side preferredSide;
-        private String location;
-        private Photo photo;
+        private Location location;
         private Rating rating;
         Client() {
             name = "";
             description = new Description();
-            childrenNumber = 1;
             preferredSide = Side.BOTH;
-            location = "";
+            location = new Location();
             photo = new Photo();
             rating = calculate(this);
             id = getNextUserId();
             container.update(id, this);
         }
 
-        Client(String Name, Description description, Integer childrenNumber, Photo photo, Side preferredSide, String location, String token) {
+        Client(String Name, Description description, Photo photo, Side preferredSide, Location location, String token) {
             this.name = Name;
             this.description = description;
-            this.childrenNumber = childrenNumber;
             this.preferredSide = preferredSide;
             this.location = location;
             this.rating = calculate(this);
@@ -122,10 +128,9 @@ public class Logic {
             this.photo = photo;
             container.update(this.id, this);
         }
-        Client(String Name, Description description, Integer childrenNumber, Side preferredSide, String location, String token) {
+        Client(String Name, Description description, Side preferredSide, Location location, String token) {
             this.name = Name;
             this.description = description;
-            this.childrenNumber = childrenNumber;
             this.preferredSide = preferredSide;
             this.location = location;
             this.rating = calculate(this);
@@ -133,10 +138,9 @@ public class Logic {
             this.token = token;
             container.update(this.id, this);
         }
-
+        @Override
         public void copy(Client change) {
             this.id = change.id;
-            this.childrenNumber = change.childrenNumber;
             this.description = change.description;
             this.location = change.location;
             this.photo = change.photo;
@@ -144,17 +148,39 @@ public class Logic {
             this.rating = change.rating;
         }
 
-
-
-        public Integer getChildrenNumber() {
-            return childrenNumber;
+        public Photo getPhoto(){
+            return this.photo;
         }
+        public void setPhoto(Photo x){
+            this.photo = x;
+        }
+        public String getToken(){
+            return token;
+        }
+        public void setToken(){
+            this.token = token;
+        }
+        public void setId(int id) {
+            this.id = id;
+        }
+        public Integer getId() {
+            return id;
+        }
+
+        public String getName(){return this.name;}
+        public void setName(String s){this.name = s;}
+
+        public Description getDescription() {
+            return description;
+        }
+        public void setDescription(Description description) {this.description = description;}
+
 
         public Side getPreferredSide() {
             return preferredSide;
         }
 
-        public String getLocation() {
+        public Location getLocation() {
             return location;
         }
 
@@ -164,15 +190,11 @@ public class Logic {
         }
 
 
-        public void setChildrenNumber(Integer childrenNumber) {
-            this.childrenNumber = childrenNumber;
-        }
-
         public void setPreferredSide(Side preferredSide) {
             this.preferredSide = preferredSide;
         }
 
-        public void setLocation(String location) {
+        public void setLocation(Location location) {
             this.location = location;
         }
 
@@ -247,7 +269,32 @@ public class Logic {
         }
 
 
+        public Photo getPhoto(){
+            return this.photo;
+        }
+        public void setPhoto(Photo x){
+            this.photo = x;
+        }
+        public String getToken(){
+            return token;
+        }
+        public void setToken(){
+            this.token = token;
+        }
+        public void setId(int id) {
+            this.id = id;
+        }
+        public Integer getId() {
+            return id;
+        }
 
+        public String getName(){return this.name;}
+        public void setName(String s){this.name = s;}
+
+        public Description getDescription() {
+            return description;
+        }
+        public void setDescription(Description description) {this.description = description;}
         public void setSchedule(Schedule schedule) {
             this.schedule = schedule;
         }
@@ -461,14 +508,14 @@ public class Logic {
     }
     public static class Description {
         public String aboutYou;
-        public Integer dateBirth;
+        public Long dateBirth;
         public Integer childNumber;
-        public String sex;
+        public SexType sex;
         Description() {
-            sex = new String("Male");
+            sex = SexType.MALE;
             childNumber = 0;
             aboutYou = new String("");
-            dateBirth = 0;
+            dateBirth = 0L;
         }
 
     }
@@ -488,8 +535,12 @@ public class Logic {
         Photo(){}
     }
 
+    enum SexType{
+        MALE,
+        FEMALE
+    }
 
-    enum DescriptionType{
+    public enum DescriptionType{
         STRING,
         NUMBER,
         DATE,
@@ -507,7 +558,7 @@ public class Logic {
 
         public DescriptionType type;
 
-        public static List<Class<?>> classToCheckList = List.of(Logic.Executor.class, Logic.User.class, Logic.Schedule.class, Logic.Description.class, Logic.Photo.class);
+        public static List<Class<?>> classToCheckList = List.of(Logic.Executor.class, Logic.User.class, Logic.Schedule.class, Logic.Description.class, Logic.Photo.class, Logic.Client.class);
 
 
         public DescriptionCharacteristicField(String title, String body, String textFieldTitle, DescriptionType type) {
@@ -546,88 +597,71 @@ public class Logic {
             this.changeable = changeable;
             this.type = type;
         }
-        public static Object getObject(String name, User executor) {
+        public static Object getObject(String name, Object user) {
+            if (!user.getClass().isMemberClass() || user.getClass().isEnum())
+                return null;
+            Class<?> currentClass = user.getClass();
 
-            try {
-                var field = Logic.Executor.class.getDeclaredField(name);
-                field.setAccessible(true);
-                return executor;
-            } catch (Exception error) {
+            // Get fields from the current class and its superclasses
+            while (currentClass != null) {
                 try {
-                    var field = Logic.Description.class.getDeclaredField(name);
+                    var field = currentClass.getDeclaredField(name);
                     field.setAccessible(true);
-                    return executor.description;
-                } catch (Exception error1) {
-                    try {
-                        var field = Logic.Photo.class.getDeclaredField(name);
+                    return user;
+                } catch (Exception error) {
+                    for (Field field : currentClass.getDeclaredFields()) {
                         field.setAccessible(true);
-                        return executor.photo;
-                    } catch (Exception error2) {
                         try {
-                            var field = Logic.Schedule.class.getDeclaredField(name);
-                            field.setAccessible(true);
-                            return ((Executor) executor).getSchedule();
-                        } catch (Exception error3) {
-                            try{
-                                var field = Logic.User.class.getDeclaredField(name);
-                                field.setAccessible(true);
-                                return executor;
+                            var result = getObject(name, Objects.requireNonNull(field.get(user)));
+                            if (result != null) {
+                                return result;
                             }
-                            catch (Exception error4) {
-                                System.out.println("Exception in getObject: " + error4.getMessage() + " " + name);
-                            }
+                        } catch (Exception e) {
+                            //Ignored
                         }
                     }
                 }
+                currentClass = currentClass.getSuperclass();
             }
+
             return null;
         }
-        public static Field getField(String name, User executor) {
-            for (Class<?> me : classToCheckList) {
+        public static Field getField(String name, Object user){
+            if (!user.getClass().isMemberClass() || user.getClass().isEnum())
+                return null;
+            Class<?> currentClass = user.getClass();
+
+            // Get fields from the current class and its superclasses
+            while (currentClass != null) {
                 try {
-                    var field = me.getDeclaredField(name);
+                    var field = currentClass.getDeclaredField(name);
                     field.setAccessible(true);
                     return field;
-                } catch (Exception ignored) {
-
+                } catch (Exception error) {
+                    for (Field field : currentClass.getDeclaredFields()) {
+                        field.setAccessible(true);
+                        try {
+                            var result = getField(name, Objects.requireNonNull(field.get(user)));
+                            if (result != null) {
+                                return result;
+                            }
+                        } catch (Exception e) {
+                            //Ignored
+                        }
+                    }
                 }
+                currentClass = currentClass.getSuperclass();
             }
-            System.out.println("Didn't found in getField");
-            assert(false);
+
             return null;
         }
         public static Object getFieldValue(String name, User executor) {
             try {
-                var field = Logic.Executor.class.getDeclaredField(name);
-                field.setAccessible(true);
-                return field.get(executor);
-            } catch (Exception error) {
-                try {
-                    var field = Logic.Description.class.getDeclaredField(name);
-                    field.setAccessible(true);
-                    return field.get(executor.getDescription());
-                } catch (Exception error1) {
-                    try {
-                        var field = Logic.Photo.class.getDeclaredField(name);
-                        field.setAccessible(true);
-                        return field.get(executor.getPhoto());
-                    } catch (Exception error2) {
-                        try {
-                            var field = Logic.Schedule.class.getDeclaredField(name);
-                            field.setAccessible(true);
-                            return field.get(((Executor)executor).getSchedule());
-                        } catch (Exception error3) {
-                            try{
-                                var field = Logic.User.class.getDeclaredField(name);
-                                field.setAccessible(true);
-                                return field.get(executor);
-                            }
-                            catch (Exception error4) {
-                                System.out.println("Exception in getObject: " + error3.getMessage() + " " + name);
-                            }
-                        }
-                    }
-                }
+                Object object = getObject(name, executor);
+                Field field = getField(name, executor);
+                return field.get(object);
+            } catch (Exception e) {
+                System.out.println("getFieldValue " + e.getMessage());
             }
             return null;
         }
@@ -638,6 +672,9 @@ public class Logic {
     public static Map<String, Object> descriptionStates = new HashMap<>();
 
     public static List<String> descriptionNames = new ArrayList<>();
+    public static List<String> clientDescriptionNames = new ArrayList<>();
+    public static List<String> executorDescriptionNames = new ArrayList<>();
+
 
     static{
         descriptionMap.put("name",
@@ -680,6 +717,33 @@ public class Logic {
                             "You should select your free time, so that we will be able to find client for you",
                             "Skip", true, DescriptionType.SCHEDULE));
         descriptionNames.add("scheduleMap");
+        {
+            Executor e = new Executor();
+            Client c = new Client();
+
+            System.out.println(Arrays.toString(c.getClass().getDeclaredFields()));
+            for (String name : descriptionNames) {
+                if (DescriptionCharacteristicField.getField(name, e) != null) {
+                    executorDescriptionNames.add(name);
+                }
+                if (DescriptionCharacteristicField.getField(name, c) != null) {
+                    clientDescriptionNames.add(name);
+                }
+            }
+
+            System.out.println(clientDescriptionNames);
+            System.out.println(descriptionNames);
+            for (var x : descriptionMap.entrySet()) {
+                try {
+                    Field field = Logic.DescriptionCharacteristicField.getField(x.getKey(), e);
+                    field.setAccessible(true);
+
+                    System.out.println("UploadExecutor fieldName "  + x.getKey() +  ": " + field.getName()  + " " + Logic.DescriptionCharacteristicField.getObject(x.getKey(), e));
+                }catch (Exception er) {
+                    System.out.println("ERROR " + er.getMessage());
+                }
+            }
+        }
 
     }
 

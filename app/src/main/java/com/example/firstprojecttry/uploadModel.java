@@ -101,10 +101,7 @@ public class uploadModel {
     }
 
     public static void reactLoaded() {
-        System.out.println("reactLoaded");
-        navController.navigate("chats/0");
-        navController.navigate("greeting");
-        navController.navigate("chats/0");
+
     }
 
     public static void setNavigation(NavController nav){

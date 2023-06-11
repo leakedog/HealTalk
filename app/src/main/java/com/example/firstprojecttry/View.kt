@@ -73,10 +73,10 @@ fun MyApp(navController: NavHostController) {
                 GreetingScreen()
             }
             composable("login") {
-                LoginScreen(navController)
+                LoginScreen()
             }
             composable("registration") {
-                SignUpScreen(navController)
+                SignUpScreen()
             }
 
         }
@@ -101,6 +101,15 @@ fun MyApp(navController: NavHostController) {
         }
         composable("search") {
             ShowMap()
+        }
+        composable("RegisterAsExecutor") {
+            ExecutorQuestionPage()
+        }
+        composable("RegisterAsClient") {
+            ClientQuestionPage()
+        }
+        composable("chooseTypeClientOrExecutor") {
+            ChooseTypePage();
         }
         composable("executors/{userId}",   arguments = listOf(navArgument("userId") { type = NavType.IntType })) {
             var backStackEntry = navController.currentBackStackEntry!!;

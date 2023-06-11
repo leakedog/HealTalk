@@ -34,6 +34,8 @@ import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SelectableDates
@@ -42,6 +44,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -62,6 +65,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
@@ -90,6 +94,27 @@ import java.lang.NumberFormatException
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Looper
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @Preview
@@ -160,7 +185,7 @@ fun GreetingScreen() {
 
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen() {
     var erorr = remember { mutableStateOf(false) }
     Column(
         Modifier
@@ -172,7 +197,7 @@ fun LoginScreen(navController: NavController) {
                 .padding(top = 20.dp, start = 15.dp)
                 .size(50.dp),
             onClick = {
-                navController.navigate("greeting")
+                AuthViewModel.goBackToStart()
             },
         ) {
             Icon(
@@ -300,8 +325,7 @@ fun LoginScreen(navController: NavController) {
                     color = Color.Black,
                     modifier = Modifier
                         .clickable(onClick = {
-                            navController.navigate("registration")
-
+                            AuthViewModel.goToSignUp();
                         })
                         .padding(start = 5.dp)
                 )
@@ -312,7 +336,7 @@ fun LoginScreen(navController: NavController) {
 }
 
 @Composable
-fun SignUpScreen(navController: NavController) {
+fun SignUpScreen() {
     var erorr = remember { mutableStateOf(false) }
     Column(
         Modifier
@@ -325,7 +349,7 @@ fun SignUpScreen(navController: NavController) {
                 .padding(top = 20.dp, start = 15.dp)
                 .size(50.dp),
             onClick = {
-                navController.navigate("greeting")
+                AuthViewModel.goBackToStart()
             },
         ) {
             Icon(
@@ -448,7 +472,7 @@ fun SignUpScreen(navController: NavController) {
                     color = Color.Black,
                     modifier = Modifier
                         .clickable(onClick = {
-                            navController.navigate("login")
+                            AuthViewModel.goToLogin();
                         })
                         .padding(start = 5.dp)
                 )
@@ -496,7 +520,7 @@ fun ChooseTypePage() {
                     .padding(10.dp)
                     .fillMaxWidth(0.5f),
                 onClick = {
-
+                    AuthViewModel.goAsClient();
                 }
             ) {
                 Column(
@@ -521,7 +545,7 @@ fun ChooseTypePage() {
                     .padding(10.dp)
                     .fillMaxWidth(1f),
                 onClick = {
-
+                    AuthViewModel.goAsExecutor();
                 }
 
             ) {
@@ -613,14 +637,12 @@ fun PageIndicatorView(
 
 @Composable
 fun StringQuestion(
-    id: Int,
+    name: String,
     onError: (Boolean) -> Unit = {}
 ) {
-    val name = Logic.descriptionNames[id]!!
     val field = Logic.descriptionMap[name]!!
     var type = field.type
     val restrictionSize = field.restrictionValue
-    println("EBLA")
     var his : String? =
         if (type != Logic.DescriptionType.NUMBER) {
             Logic.descriptionStates[name] as String?
@@ -632,16 +654,16 @@ fun StringQuestion(
             }
         }
     println(name)
-    var idt by remember { mutableStateOf(id) }
+    var idt by remember { mutableStateOf(name) }
     if (his == null) {
         his = "";
     }
     var text by remember { mutableStateOf(his) }
-    var erorr by remember { mutableStateOf(false) }
+    var (erorr, changeError) = remember { mutableStateOf(false) }
     var symbolsCount by remember { mutableIntStateOf(text.length) }
-    if (idt != id) {
+    if (idt != name) {
         text = his;
-        idt = id;
+        idt = name;
         symbolsCount = 0;
     }
     OutlinedTextField(
@@ -649,27 +671,11 @@ fun StringQuestion(
         onValueChange = {
             symbolsCount = it.length
             text = it
-            if (type == Logic.DescriptionType.STRING) {
-                Logic.descriptionStates[name] = text
-                if (!field.changeable && symbolsCount == 0) {
-                    erorr = true
-                }
-            } else {
-                if (text == "") {
-                    erorr = true;
-                }
-                try{
-                    val x = text.toInt()
-                } catch (e : Exception) {
-                    erorr = true
-                }
-                if (!erorr) {
-                    Logic.descriptionStates[name] = text.toInt()
-                }
-            }
+            handleStringInput(text, changeError, type, restrictionSize, symbolsCount, onError)
 
-            erorr = symbolsCount > restrictionSize
-            onError(!erorr)
+            if (!erorr) {
+                descriptionStates[name] = text
+            }
         },
         label = {
             Text(field.textFieldTitle)
@@ -721,10 +727,11 @@ fun PageIndicatorQuestions(
     space: Dp = 10.dp,
     animationDurationInMillis: Int = 300,
     onClick : (Int) -> Unit = {},
-    onFinish : () -> Unit = {}
+    onFinish : () -> Unit = {},
+    list: MutableList<String>
 ) {
     var (isEnabledValue, changeEnabled) = remember { mutableStateOf(false)}
-    val numberOfPages = Logic.descriptionMap.size
+    val numberOfPages = list.size
     var stateGrid = rememberSaveable{mutableStateOf(HashMap<String, MutableState<Boolean>>())}
     Column(
         Modifier
@@ -770,11 +777,11 @@ fun PageIndicatorQuestions(
             println(descriptionNames[selectedPage])
             println(selectedPage)
             println(descriptionNames)
-            val name = descriptionNames[selectedPage]!!
+            val name = list[selectedPage]!!
             val field = descriptionMap[name]!!
             val typo = field.type
             if (typo == Logic.DescriptionType.DATE) {
-                DateQuestion(onError = changeEnabled, id = selectedPage)
+                DateQuestion(onError = changeEnabled, name = name)
             }
             else{
                 Text(
@@ -796,13 +803,13 @@ fun PageIndicatorQuestions(
                     color = Color.Gray
                 )
                 if (typo == Logic.DescriptionType.STRING || typo == Logic.DescriptionType.NUMBER){
-                    StringQuestion(id = selectedPage, onError = changeEnabled)
+                    StringQuestion(onError = changeEnabled, name = name)
                 } else if (typo == Logic.DescriptionType.CHECKBOX) {
-                    SelectionQuestion(id = selectedPage)
+                    SelectionQuestion(name = name)
                 } else if (typo == Logic.DescriptionType.SCHEDULE) {
                     ScheduleQuestion(stateGrid)
                 } else if (typo == Logic.DescriptionType.PHOTO) {
-                    PhotoQuestion(id = selectedPage)
+                    PhotoQuestion(name = name)
                 }
             }
             Box(
@@ -823,7 +830,7 @@ fun PageIndicatorQuestions(
                             //TODO save data
                             onClick(selectedPage + 1);
                         } else {
-                            //onFinish()
+                            onFinish()
                         }
                     },
                     modifier = Modifier
@@ -857,9 +864,31 @@ fun PageIndicatorQuestions(
 
 @Preview
 @Composable
-fun QuestionPage(
+fun ExecutorQuestionPage(){
+    val (selectedPage, setSelectedPage) = remember {
+        mutableIntStateOf(0)
+    }
 
-){
+        // NEVER use this, this is just for exampl
+
+    PageIndicatorQuestions(
+        selectedPage = selectedPage,
+        defaultRadius = 10.dp,
+        selectedLength = 40.dp,
+        space = 2.dp,
+        onClick = setSelectedPage,
+        selectedColor = colorResource(id = R.color.purple_500),
+        onFinish = {
+            ProfileViewModel.firstUploadUser(1);
+        },
+        list = Logic.executorDescriptionNames
+    )
+
+}
+
+@Preview
+@Composable
+fun ClientQuestionPage(){
     val (selectedPage, setSelectedPage) = remember {
         mutableIntStateOf(0)
     }
@@ -874,20 +903,22 @@ fun QuestionPage(
         onClick = setSelectedPage,
         selectedColor = colorResource(id = R.color.purple_500),
         onFinish = {
-            ProfileViewModel.uploadUser(AuthViewModel.getCurrentUser())
-        }
+            ProfileViewModel.firstUploadUser(0);
+        },
+        list = Logic.clientDescriptionNames
     )
 
 }
 
-@Preview
 @Composable
 fun SelectionQuestion(
-    id: Int = 4
+    name: String
 ) {
-    val name = Logic.descriptionNames[id]!!
     val field = Logic.descriptionMap[name]!!
-    var state by remember { mutableStateOf(true) }
+    var state by remember { mutableStateOf(
+        (Logic.descriptionStates[name] == null) ||
+                (Logic.descriptionStates[name] ==Logic.SexType.MALE)
+    ) }
     println(name)
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -902,9 +933,9 @@ fun SelectionQuestion(
                 onCheckedChange = {
                     state = !state
                     if (state) {
-                        Logic.descriptionStates[name] = 1
+                        Logic.descriptionStates[name] = Logic.SexType.MALE
                     } else {
-                        Logic.descriptionStates[name] = 0
+                        Logic.descriptionStates[name] = Logic.SexType.FEMALE
                     }
                 },
 
@@ -927,15 +958,13 @@ fun SelectionQuestion(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnrememberedMutableState")
-@Preview
 @Composable
 fun DateQuestion(
-    id: Int = 3,
+    name: String,
     onError: (Boolean) -> Unit = {}
 ){
 
 
-    val name = Logic.descriptionNames[id]!!
     val field = Logic.descriptionMap[name]!!
     val datePickerState = rememberDatePickerState(selectableDates = object : SelectableDates {
         // Blocks Sunday and Saturday from being selected.
@@ -969,7 +998,16 @@ fun DateQuestion(
     val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
     onError(confirmEnabled.value)
 
-    DatePicker(title = { Text(text = field.title, style = MaterialTheme.typography.titleLarge)  }, headline = { Text(field.body, color = Color.Gray) }, state = datePickerState,showModeToggle = false, modifier = Modifier.padding(bottom = 40.dp))
+    DatePicker(title = {
+        Text( style = MaterialTheme.typography.headlineMedium,
+            text = field.title,
+            fontWeight = FontWeight.Bold)
+                       },
+        headline = { Text( text = field.body,
+            style = MaterialTheme.typography.titleLarge,
+            color = Color.Gray) },
+        state = datePickerState,showModeToggle = false,
+        modifier = Modifier.padding(bottom = 40.dp))
     if (datePickerState.selectedDateMillis != null) {
         Logic.descriptionStates[name] = datePickerState.selectedDateMillis
         println(Logic.descriptionStates)
@@ -979,28 +1017,26 @@ fun DateQuestion(
 
 @Composable
 fun ScheduleQuestion(
-    state : MutableState<HashMap<String, MutableState<Boolean>>>,
+    state : MutableState<HashMap<String, MutableState<Boolean>>>
 ) {
     for (i in Logic.Schedule.keyNames) {
         state.value[i] = rememberSaveable{ mutableStateOf(false) }
     }
     ScheduleGrid(state = state, true)
-    println("Change")
 }
 
 @Composable
 fun PhotoQuestion(
-    id: Int
+    name: String
 ) {
-    val name = Logic.descriptionNames[id]!!
     val field = Logic.descriptionMap[name]!!
     var photoURL = rememberSaveable {mutableStateOf("")}
-
+    println("PhotoQuestion recompose")
+    descriptionStates[name] = photoURL.value
     var imageUriState = remember{mutableStateOf<Uri?> (null)}
     val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         imageUriState.value = uri
         ProfileViewModel.tryUploadImage(photoURL, imageUriState)
-        descriptionStates[name] = photoURL.value
     }
     Box(modifier = Modifier
         .fillMaxWidth(),
@@ -1026,7 +1062,8 @@ fun PhotoQuestion(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(150.dp)
-                        .align(Alignment.Start).background(Color.LightGray)
+                        .align(Alignment.Start)
+                        .background(Color.LightGray)
 
                 )
             }
@@ -1048,4 +1085,12 @@ fun PhotoQuestion(
             }
         }
     }
+}
+
+
+
+@Preview
+@Composable
+fun retreiveGEO() {
+
 }
