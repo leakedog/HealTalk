@@ -60,6 +60,7 @@ public class uploadModel {
     public static DatabaseReference chatBase;
     public static DatabaseReference userChatBase;
 
+    public static DatabaseReference publicKeyBase;
     public static Boolean Loaded = false;
 
     public static void addUser(User user) {
@@ -79,7 +80,7 @@ public class uploadModel {
 
 
     static public class LoadWait{
-        final int EXPECT = 5;
+        final int EXPECT = 6;
         Integer maskLoaded = 0;
         Boolean isDone = false;
         void update(int id){
@@ -89,7 +90,7 @@ public class uploadModel {
             System.out.println(maskLoaded + " We did it again");
             if(maskLoaded == (1 << EXPECT) - 1){
                 System.out.println("we updated and we navigate\n");
-                navController.navigate("Chat");
+//                navController.navigate("Chat");
                 uploadModel.reactLoaded();
                 isDone = true;
             }
@@ -100,7 +101,9 @@ public class uploadModel {
     }
 
     public static void reactLoaded() {
-        navController.navigate("profile");
+
+        return;
+        //navController.navigate("profile");
     }
 
     public static void setNavigation(NavController nav){
@@ -116,12 +119,14 @@ public class uploadModel {
         orderBase = FirebaseDatabase.getInstance("https://healtalk-7ab6c-default-rtdb.europe-west1.firebasedatabase.app/").getReference("orders/");
         chatBase = FirebaseDatabase.getInstance("https://healtalk-7ab6c-default-rtdb.europe-west1.firebasedatabase.app/").getReference("chat");
         userChatBase = FirebaseDatabase.getInstance("https://healtalk-7ab6c-default-rtdb.europe-west1.firebasedatabase.app/").getReference("users/userChat");
+        publicKeyBase = FirebaseDatabase.getInstance("https://healtalk-7ab6c-default-rtdb.europe-west1.firebasedatabase.app/").getReference("users/publicKeys");
         clientsBase.addValueEventListener(produceClientEventListener());
         executorsBase.addValueEventListener(produceExecutorEventListener());
         orderBase.addValueEventListener(produceOrderEventListener());
         chatBase.addValueEventListener(produceChatEventListener());
         userChatBase.addValueEventListener(produceUserChatEventListener());
         System.out.println("listeners loaded");
+        publicKeyBase.addValueEventListener(producePublicKeyEventListener());
 //        clientsBase.addChildEventListener(produceClientChildListener());
         mAuth = FirebaseAuth.getInstance();
     }
@@ -139,17 +144,13 @@ public class uploadModel {
     /// a database of (public_key, token), thus we just take this token and if it is actually the same than we good, otherwise we throw an error
     /// if everything okay, we know that our key on our data_base is public key, thus we can reference to it. DONE.
 
-    protected static void updateClient(Client person){
 
-    }
 
     protected static void addExecutor(Executor person) {
-        person.id = 53243;
-        println("authViewModel " + AuthViewModel.token);
        mDatabase.child("users").child("executors").child(person.getId().toString()).setValue(person).addOnCompleteListener(insertionReaction("Executor")).addOnFailureListener(failureReaction("Executor"));
     }
     protected static void addChat(Messenger.Chat chat){
-         System.out.println("TRHOW MY FUNCTION");
+       // System.out.println("TRHOW MY FUNCTION");
         mDatabase.child("users").child("userChat").child(chat.getA().toString()).child(chat.getId().toString()).setValue(chat.getId().toString()).addOnCompleteListener(insertionReaction("chat")).addOnFailureListener(failureReaction("chat"));
         mDatabase.child("users").child("userChat").child(chat.getB().toString()).child(chat.getId().toString()).setValue(chat.getId().toString()).addOnCompleteListener(insertionReaction("chat")).addOnFailureListener(failureReaction("chat"));
         mDatabase.child("chat").child(chat.getId().toString()).child("chatInfo").setValue((Messenger.ChatInfo)chat);
@@ -164,34 +165,40 @@ public class uploadModel {
         mDatabase.child("orders").child(order.getId().toString()).setValue(order).addOnCompleteListener(insertionReaction("Order")).addOnFailureListener(failureReaction("Order"));
     }
     // load values from Client database and react for every change
-    static ChildEventListener produceClientChildListener(){
-        return new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                System.out.println("CHILD ADDED");
-            }
+   protected static void addPublicKey(String token, Integer publicCode){
+        mDatabase.child("users").child("publicKeys").child(publicCode.toString()).setValue(token);
+   }
+   static ValueEventListener producePublicKeyEventListener(){
+       return new ValueEventListener() {
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+           @Override
+           public void onDataChange(@NonNull DataSnapshot snapshot) {
+               Map<String, String> list = snapshot.getValue(new GenericTypeIndicator<HashMap<String,String>>() {
+                   @Override
+                   public int hashCode() {
+                       return super.hashCode();
+                   }
+               });
+               try {
+                   for (Map.Entry<String, String> pairKey : list.entrySet()) {
+                       System.out.println("Pair of keys: " + pairKey.getKey() + " , " + pairKey.getValue());
+                       PublicKey.update(pairKey.getValue(), Integer.valueOf(pairKey.getKey()));
+                   }
+               } catch (NullPointerException e) {
+                   System.out.println("List is empty in " + e.getMessage() + " for method " + "clientUpdateDatabase");
+               }
+               loadedResources.update(5);
+               evaluateMask();
+           }
 
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        };
-    }
+           @Override
+           public void onCancelled(@NonNull DatabaseError databaseError) {
+               Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+               loadedResources.update(5);
+               evaluateMask();
+           }
+       };
+   }
     static ValueEventListener produceClientEventListener() {
         return new ValueEventListener() {
 
