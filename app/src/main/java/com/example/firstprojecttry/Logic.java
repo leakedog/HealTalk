@@ -163,7 +163,8 @@ public class Logic {
             return rating;
         }
 
-
+        public Photo getPhoto(){return photo;}
+        public void setPhoto(Photo x){this.photo = x;}
         public void setChildrenNumber(Integer childrenNumber) {
             this.childrenNumber = childrenNumber;
         }
@@ -247,7 +248,8 @@ public class Logic {
         }
 
 
-
+        public void setPhoto(Photo x){this.photo = x;}
+        public Photo getPhoto(){return this.photo;}
         public void setSchedule(Schedule schedule) {
             this.schedule = schedule;
         }

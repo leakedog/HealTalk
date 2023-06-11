@@ -101,9 +101,10 @@ public class uploadModel {
     }
 
     public static void reactLoaded() {
-
-        return;
-        //navController.navigate("profile");
+        System.out.println("reactLoaded");
+        navController.navigate("chats/0");
+        navController.navigate("greeting");
+        navController.navigate("chats/0");
     }
 
     public static void setNavigation(NavController nav){
@@ -133,19 +134,13 @@ public class uploadModel {
 
     /// so far we have on verification of your public code using your token, to do this we just need to make a new database that stores (public_id, token)
     protected static void addClient(Client person) {
-        mDatabase.child("users").child("clients").child("info").child(person.getId().toString()).setValue(person).addOnCompleteListener(insertionReaction("Client")).addOnFailureListener(failureReaction("Client"));
-
-        mDatabase.child("users").child("executors").child(person.getId().toString()).setValue(person).addOnCompleteListener(insertionReaction("Executor")).addOnFailureListener(failureReaction("Executor"));
-
+        mDatabase.child("users").child("clients").child("info").child("C"+person.getId().toString()).setValue(person).addOnCompleteListener(insertionReaction("Client")).addOnFailureListener(failureReaction("Client"));
     }
 
 
     /// yup this one is long, instead what we can do, is to give each of the user public key, it's number of register user, afterwards we have
     /// a database of (public_key, token), thus we just take this token and if it is actually the same than we good, otherwise we throw an error
     /// if everything okay, we know that our key on our data_base is public key, thus we can reference to it. DONE.
-
-
-
     protected static void addExecutor(Executor person) {
        mDatabase.child("users").child("executors").child(person.getId().toString()).setValue(person).addOnCompleteListener(insertionReaction("Executor")).addOnFailureListener(failureReaction("Executor"));
     }
@@ -173,17 +168,16 @@ public class uploadModel {
 
            @Override
            public void onDataChange(@NonNull DataSnapshot snapshot) {
-               Map<String, String> list = snapshot.getValue(new GenericTypeIndicator<HashMap<String,String>>() {
-                   @Override
-                   public int hashCode() {
-                       return super.hashCode();
-                   }
-               });
+
                try {
-                   for (Map.Entry<String, String> pairKey : list.entrySet()) {
-                       System.out.println("Pair of keys: " + pairKey.getKey() + " , " + pairKey.getValue());
-                       PublicKey.update(pairKey.getValue(), Integer.valueOf(pairKey.getKey()));
+
+                   for(DataSnapshot pair : snapshot.getChildren()){
+                       Integer publicKey = Integer.valueOf(pair.getKey());
+                       PublicKey.update(pair.getValue(String.class), publicKey);
                    }
+
+
+
                } catch (NullPointerException e) {
                    System.out.println("List is empty in " + e.getMessage() + " for method " + "clientUpdateDatabase");
                }
@@ -344,14 +338,12 @@ public class uploadModel {
                     System.out.println("Something very bad happened in " + e.getMessage() + " for method " + "produceChatEventListener");
                 }
                 loadedResources.update(3);
-              //  evaluateMask();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
                 loadedResources.update(3);
-             //   evaluateMask();
             }
         };
     }
@@ -398,55 +390,7 @@ public class uploadModel {
                 }
                 System.out.println("We LOADED USER CHAT");
                 loadedResources.update(4);
-/*
-                if(list != null && !list.isEmpty()){
-                    for (Map.Entry<String, Map<String,Integer>> pair : list.entrySet()) {
-                        Set<Map.Entry<String,Integer>> ourSet = pair.getValue().entrySet();
-                        ArrayList<Map.Entry<String,Integer>> ourList = new ArrayList<>();
-                        ourList.addAll(ourSet);
-                        Collections.sort(ourList, new Comparator<Map.Entry<String,Integer>>(){
-
-                            @Override
-                            public int compare(Map.Entry<String, Integer >a, Map.Entry<String,Integer> b) {
-                                if (Integer.valueOf(a.getKey()) < Integer.valueOf(b.getKey())) {
-                                    return -1;
-                                }
-                                if (a.getKey() == b.getKey()) {
-                                    return 0;
-                                }
-                                return +1;
-                            }
-                        });
-                        ArrayList<Integer> messagesId = new ArrayList<>();
-                        for(int i = 0; i < ourList.size(); ++i)
-                            messagesId.add(ourList.get(i).getValue());
-                        chatMessages.update(Integer.valueOf(pair.getKey()), messagesId);
-                    }
-                }
-
-*/
-
-
-
-
-/*
-                Map<String, ArrayList<Integer> > list = snapshot.getValue(new GenericTypeIndicator<HashMap<String , ArrayList<Integer>  >>() {
-                    @Override
-                    public int hashCode() {
-                        return super.hashCode();
-                    }
-                });
-
-                if(list != null && !list.isEmpty()){
-                    for (Map.Entry<String, ArrayList<Integer>> pair : list.entrySet()) {
-                        chatMessages.update(Integer.valueOf(pair.getKey()), pair.getValue());
-                    }
-                }*/
-
-
-
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
@@ -457,14 +401,7 @@ public class uploadModel {
     }
     /// if all databases loaded correctly switch to Main screen
     static public void evaluateMask() {
-        /*
-        if (maskLoaded == 7 && !Loaded) {
-            Log.w(TAG, "Loaded databases successfully!");
-            navController.navigate("screen2");
-            Loaded = true;
-        }
 
-         */
     }
 
 
