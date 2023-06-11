@@ -103,7 +103,7 @@ public class uploadModel {
     }
 
     public static void reactLoaded() {
-        AuthViewModel.reactLoaded();
+      AuthViewModel.reactLoaded();
     }
 
     public static void setNavigation(NavController nav){
@@ -150,6 +150,8 @@ public class uploadModel {
         mDatabase.child("chat").child(chat.getId().toString()).child("chatInfo").setValue((Messenger.ChatInfo)chat);
     }
     protected static void addMessage(Integer chatId, Messenger.Message message){
+        NotificationSender.sendMessageNotification(Chats.container.get(chatId).getA(), chatId);
+        NotificationSender.sendMessageNotification(Chats.container.get(chatId).getB(), chatId);
         System.out.println("ADD MESSAGE BY ME");
         assert(chatId != null);
         assert(message.getId() != null);

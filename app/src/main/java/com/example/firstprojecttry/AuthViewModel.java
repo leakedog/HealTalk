@@ -120,8 +120,10 @@ public class AuthViewModel {
     }
 
     public static void startLogged() {
-        if (!isWaitingLoading && !isWaiting)
+        if (!isWaitingLoading && !isWaiting) {
+            Notifications.setNotificationListener(AuthViewModel.getCurrentUser().id);
             navController.navigate("LoggedApp"); /// loggedApp
+        }
 
     }
 

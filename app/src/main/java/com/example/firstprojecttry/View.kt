@@ -57,8 +57,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MyApp(navController: NavHostController) {
+    Notifications.setController(navController)
+    uploadModel.setNavigation(navController)
     uploadModel()
-    uploadModel.setNavigation(navController);
     NavHost(navController, startDestination = "loading") {
         composable("error") {
             ErrorScreen()
@@ -134,6 +135,9 @@ fun MyApp(navController: NavHostController) {
             })
         }
     }
+}
+fun getRoot(navCont : NavController) : String?{
+    return navCont.previousBackStackEntry?.destination?.route
 }
 
 @Composable

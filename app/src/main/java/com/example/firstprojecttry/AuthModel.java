@@ -107,6 +107,7 @@ public class AuthModel {
         }
     }
     public static void startApplication() {
+        System.out.println("Start");
         if (mAuth.getCurrentUser() != null) {
             System.out.println("WTFF");
             AuthViewModel.isWaiting = true;
@@ -123,6 +124,12 @@ public class AuthModel {
         System.out.println("DEBUG");
         System.out.println(PublicKey.keys);
         System.out.println(token);
+        if (PublicKey.getPublicId(token) == null) {
+            System.out.println("Signout");
+            mAuth.signOut();
+            AuthViewModel.handleError();
+            return null;
+        }
         System.out.println(PublicKey.getPublicId(token));
         //TODO find really who i am
         return Logic.User.container.get(PublicKey.getPublicId(token));
