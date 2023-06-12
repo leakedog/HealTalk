@@ -1,30 +1,14 @@
 package com.example.firstprojecttry
 
-import android.annotation.SuppressLint
-import android.content.ContentValues.TAG
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.*
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -33,18 +17,40 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
 import com.example.firstprojecttry.Logic.Executor
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.UploadTask
-import kotlin.concurrent.thread
+import com.example.firstprojecttry.Logic.UtilityClass
+import com.example.firstprojecttry.Login.AuthModel
+import com.example.firstprojecttry.Login.AuthViewModel
+import com.example.firstprojecttry.Login.ChooseTypePage
+import com.example.firstprojecttry.Login.ClientQuestionPage
+import com.example.firstprojecttry.Login.ExecutorQuestionPage
+import com.example.firstprojecttry.Login.GreetingScreen
+import com.example.firstprojecttry.Login.LoginScreen
+import com.example.firstprojecttry.Login.SignUpScreen
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val locationPermissionRequest = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+            when {
+                permissions.getOrDefault(android.Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+                    // Precise location access granted.
+                }
+                permissions.getOrDefault(android.Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                    // Only approximate location access granted.
+                } else -> {
+                // No location access granted.
+            }
+            }
+        }
+        locationPermissionRequest.launch(arrayOf(
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION))
         setContent {
+
             val navController = rememberNavController()
             AuthViewModel.navController = navController;
             ProfileViewModel.navController = navController;
@@ -57,9 +63,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MyApp(navController: NavHostController) {
+
     Notifications.setController(navController)
     uploadModel.setNavigation(navController)
     uploadModel()
+    UtilityClass()
     NavHost(navController, startDestination = "loading") {
         composable("error") {
             ErrorScreen()
@@ -97,9 +105,10 @@ fun MyApp(navController: NavHostController) {
         }
         navigation(startDestination = "chat", route = "messages"){
             composable("chat"){
-                demonstrate()
+                ShowChats(AuthModel.getCurrentUser());
             }
         }
+
         composable("search") {
             ShowMap()
         }
@@ -130,9 +139,13 @@ fun MyApp(navController: NavHostController) {
         composable("chats/{userId}",   arguments = listOf(navArgument("userId") { type = NavType.IntType })) {
             var backStackEntry = navController.currentBackStackEntry!!
             val userId = backStackEntry.arguments!!.getInt("userId")
-            ShowChatScreen(x = Messenger.startCommunication(AuthModel.getCurrentUser().getId(), userId), viewer = AuthModel.getCurrentUser().getId(), goBackFun = {
-                navController.navigate("search")
-            })
+            ShowChatScreen(
+                x = Messenger.startCommunication(
+                    AuthModel.getCurrentUser().getId(),
+                    userId
+                ), viewer = AuthModel.getCurrentUser().getId(), goBackFun = {
+                    navController.navigate("chat")
+                })
         }
     }
 }
@@ -140,43 +153,7 @@ fun getRoot(navCont : NavController) : String?{
     return navCont.previousBackStackEntry?.destination?.route
 }
 
-@Composable
-fun Screen1(navController: NavController) {
-    LoadingBlock()
+
+fun getArg(navCont : NavController) : Int?{
+    return navCont.currentBackStackEntry?.arguments?.getInt("userId")
 }
-
-@Composable
-fun Screen2(navController: NavController, Loading: MutableState<Boolean>) {
-    if (Loading.value) {
-        Loading.value = false;
-        navController.navigate("screen1");
-    }
-    /*
-    var me : Logic.Executor = Logic.Executor();
-    me.setId(53243);
-    ServerLogic.addExecutor(me);
-    Button(onClick = { navController.navigate("screen1") }) {
-        Text("Go back to Screen 1")
-    }
-
-     */
-}
-
-
-@Composable
-fun Screen3(navController: NavController) {
-    Text("Screen3")
-}
-
-
-
-
-
-
-@Composable
-fun Screen4(navController: NavController) {
-    Text("Screen4")
-}
-
-
-

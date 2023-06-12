@@ -49,6 +49,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -212,6 +213,7 @@ fun DisplayAllMarkers(marks: List<Executor>, updateStatus: (Executor) -> Unit){
 }
 
 
+var center = CameraPosition.fromLatLngZoom(LatLng(50.0614285,19.9209253), 17f)
 @Composable
 fun ShowMap() {
     var showId by remember {mutableStateOf(Executor())}
@@ -219,10 +221,11 @@ fun ShowMap() {
     val displayCard = {a: Executor -> showId = a
         showExecutor.value = true
     }
-    val center = LatLng(50.0614285,19.9209253)
-    val cameraPositionState = rememberCameraPositionState{
-        position = CameraPosition.fromLatLngZoom(center, 17f)
+
+    val cameraPositionState = rememberCameraPositionState {
+        position = center
     }
+    center = cameraPositionState.position
     Scaffold(
         bottomBar = {
             BottomBar()
@@ -230,8 +233,11 @@ fun ShowMap() {
     ) {
         paddingValues ->
         GoogleMap(
-            modifier = Modifier.padding(paddingValues).fillMaxSize(),
-            cameraPositionState = cameraPositionState
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
+            cameraPositionState = cameraPositionState,
+            properties = MapProperties(isMyLocationEnabled = true)
         ) {
             if (showExecutor.value) {
                 ProfileViewModel.showExecutor(showId)

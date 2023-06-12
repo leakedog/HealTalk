@@ -2,33 +2,23 @@ package com.example.firstprojecttry;
 
 import static android.content.ContentValues.TAG;
 
-import static com.example.firstprojecttry.Logic.calculate;
+import static com.example.firstprojecttry.Logic.Rating.calculate;
 import static com.example.firstprojecttry.Messenger.Chats;
-import static com.example.firstprojecttry.Messenger.chatMessages;
 import static com.example.firstprojecttry.Messenger.userChat;
 
 import static java.lang.Thread.currentThread;
 import static java.lang.Thread.sleep;
-import static java.sql.DriverManager.println;
 
-import android.net.Uri;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.compose.runtime.MutableState;
 import androidx.navigation.NavController;
 
+import com.example.firstprojecttry.Login.AuthViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -36,22 +26,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.example.firstprojecttry.Logic.*;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
-
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class uploadModel {
     public static NavController navController = null;
@@ -103,7 +82,7 @@ public class uploadModel {
     }
 
     public static void reactLoaded() {
-      AuthViewModel.reactLoaded();
+        AuthViewModel.reactLoaded();
     }
 
     public static void setNavigation(NavController nav){
@@ -150,8 +129,6 @@ public class uploadModel {
         mDatabase.child("chat").child(chat.getId().toString()).child("chatInfo").setValue((Messenger.ChatInfo)chat);
     }
     protected static void addMessage(Integer chatId, Messenger.Message message){
-        NotificationSender.sendMessageNotification(Chats.container.get(chatId).getA(), chatId);
-        NotificationSender.sendMessageNotification(Chats.container.get(chatId).getB(), chatId);
         System.out.println("ADD MESSAGE BY ME");
         assert(chatId != null);
         assert(message.getId() != null);
@@ -211,8 +188,8 @@ public class uploadModel {
                     for (Map.Entry<String, Client> pairClient : list.entrySet()) {
                         var client = pairClient.getValue();
                         System.out.println("Found client " + client);
-                        Client.container.update(client.id, client);
-                        User.container.update(client.id, client);
+                        Client.container.update(client.getId(), client);
+                        User.getContainer().update(client.getId(), client);
                     }
                 } catch (NullPointerException e) {
                     System.out.println("List is empty in " + e.getMessage() + " for method " + "clientUpdateDatabase");
@@ -246,7 +223,7 @@ public class uploadModel {
                     {
                         System.out.println("Found client " + executor.getValue().getName() + " hah " + executor.getValue().getPhoto().getPhotoURL() + executor.getValue().getId().toString());
                         Executor.container.update(executor.getValue().getId(), executor.getValue());
-                        User.container.update(executor.getValue().getId(), executor.getValue());
+                        User.getContainer().update(executor.getValue().getId(), executor.getValue());
                     }
                 } catch (NullPointerException e) {
                     System.out.println("List is empty in " + e.getMessage() + " for method " + "executorUpdateDatabase");
@@ -280,7 +257,7 @@ public class uploadModel {
                     if (list != null && !list.isEmpty()) {
                         for (Map.Entry<String, Order> pair : list.entrySet()) {
                             var order = pair.getValue();
-                            Order.container.update(order.id, order);
+                            Order.container.update(order.getId(), order);
 
                             order.getExecutor().setRating(calculate(order.getExecutor()));
                             order.getExecutor().setRating(calculate(order.getClient()));
@@ -320,12 +297,20 @@ public class uploadModel {
 
                         if(chat.child("messages").exists()) {
                             for (DataSnapshot msg : chat.child("messages").getChildren()) {
-                                addchat.addMessage(msg.getValue(new GenericTypeIndicator<Messenger.Message>() {
+                                Messenger.Message message = msg.getValue(new GenericTypeIndicator<Messenger.Message>() {
                                     @Override
                                     public int hashCode() {
                                         return super.hashCode();
                                     }
-                                }));
+                                });
+                                addchat.addMessage(message);
+                                Integer chatId = message.getChat();
+                                if(loadedResources.isDone == true) {
+                                    NotificationSender.sendMessageNotification(Chats.container.get(chatId).getA(), Chats.container.get(chatId).getB());
+                                    NotificationSender.sendMessageNotification(Chats.container.get(chatId).getB(), Chats.container.get(chatId).getA());
+
+                                }
+
 
                             }
                         }
@@ -403,10 +388,6 @@ public class uploadModel {
     static public void evaluateMask() {
 
     }
-
-
-
-
 }
 
 

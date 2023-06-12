@@ -1,7 +1,9 @@
 package com.example.firstprojecttry;
 
 import static android.content.ContentValues.TAG;
+
 import static com.example.firstprojecttry.Messenger.userChat;
+import static com.example.firstprojecttry.ViewKt.getArg;
 import static com.example.firstprojecttry.ViewKt.getRoot;
 
 import android.util.Log;
@@ -44,9 +46,16 @@ public class Notifications {
 
                     Integer chatId = Integer.valueOf(theNotification.getValue(Integer.class));
 
-                    if(getRoot(navController).equals("chats/"+chatId)){
-                        navController.navigate("chats/"+chatId);
+                    if(getRoot(navController).equals("chats/{userId}")){
+
+                        System.out.println("HEYYY EQUAL");
+                        System.out.println("arg " + getArg(navController));
+
+                        navController.navigate("chats/"+getArg(navController));
                     }
+
+                    System.out.println("Sorry not equal " + getRoot(navController));
+                    //  navController.navigate(getRoot(navController));
                 }
             }
 
@@ -71,7 +80,7 @@ public class Notifications {
             }
         };
     }
-    static void setNotificationListener(Integer id){
+    public static void setNotificationListener(Integer id){
         myNotification = FirebaseDatabase.getInstance("https://healtalk-7ab6c-default-rtdb.europe-west1.firebasedatabase.app/").getReference("notifications/"+id);
         myNotification.addChildEventListener(produceNotificationEventListener());
     }

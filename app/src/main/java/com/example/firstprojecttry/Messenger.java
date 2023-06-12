@@ -1,5 +1,4 @@
 package com.example.firstprojecttry;
-import com.example.firstprojecttry.Logic;
 import com.google.firebase.firestore.auth.User;
 
 import java.time.LocalDate;

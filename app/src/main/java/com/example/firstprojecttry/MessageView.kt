@@ -136,6 +136,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.firstprojecttry.Logic.Description
 import com.example.firstprojecttry.Logic.Executor
+import com.example.firstprojecttry.Logic.Photo
 import com.google.firebase.concurrent.UiExecutor
 import kotlinx.coroutines.launch
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
@@ -146,7 +147,6 @@ import java.util.Calendar
 import java.util.TimeZone
 
 import com.example.firstprojecttry.Messenger
-import com.example.firstprojecttry.Logic
 import com.google.firebase.firestore.auth.User
 import java.lang.Math.floor
 
@@ -185,7 +185,7 @@ public val messageFont = TextStyle(
 )
 
 @Composable
-fun DisplayMessage(text : String, side : UserMessageSide, photo : Logic.Photo){
+fun DisplayMessage(text : String, side : UserMessageSide, photo : Photo){
 
 
     val messageLen : Dp = messageLength(text, messageFont.fontSize)
@@ -261,12 +261,12 @@ fun showHowLook() {
         DisplayMessage(
             "Hey",
             UserMessageSide.RECEIVER,
-            Logic.Photo("https://stats.ioinformatics.org/img/photos/2022/7678.jpg")
+           Photo("https://stats.ioinformatics.org/img/photos/2022/7678.jpg")
         )
         DisplayMessage(
             "Wassup",
             UserMessageSide.SENDER,
-            Logic.Photo("https://media.licdn.com/dms/image/D4D03AQHu2ES2QbvZgg/profile-displayphoto-shrink_800_800/0/1666369413666?e=2147483647&v=beta&t=l6mqyt4ks3YTB4Uqrx_fFRzHtlpiSqc35TROjomRAI4")
+            Photo("https://media.licdn.com/dms/image/D4D03AQHu2ES2QbvZgg/profile-displayphoto-shrink_800_800/0/1666369413666?e=2147483647&v=beta&t=l6mqyt4ks3YTB4Uqrx_fFRzHtlpiSqc35TROjomRAI4")
         )
     }
 }

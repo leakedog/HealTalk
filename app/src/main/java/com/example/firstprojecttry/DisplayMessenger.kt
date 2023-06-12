@@ -33,6 +33,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -49,6 +50,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
@@ -122,6 +124,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalConfiguration
@@ -132,6 +135,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
@@ -149,6 +153,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.firstprojecttry.Logic.Description
 import com.example.firstprojecttry.Logic.Executor
+import com.example.firstprojecttry.Logic.User
 import com.google.firebase.concurrent.UiExecutor
 import kotlinx.coroutines.launch
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
@@ -158,13 +163,12 @@ import java.time.ZoneId
 import java.util.Calendar
 import java.util.TimeZone
 import com.example.firstprojecttry.Messenger
-import com.example.firstprojecttry.Logic
 import com.example.firstprojecttry.MessageModel.sendMessage
 import com.example.firstprojecttry.Messenger.Chats
 import com.example.firstprojecttry.Messenger.cpy
+import com.example.firstprojecttry.Messenger.startCommunication
 import com.example.firstprojecttry.uploadModel.navController
 import com.google.android.gms.maps.model.Circle
-import com.google.firebase.firestore.auth.User
 import java.lang.Thread.sleep
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -205,199 +209,250 @@ fun getWidth() : Int{
     val screenWidth = configuration.screenWidthDp
     return screenWidth
 }
+public var recomposeShowChatScreen : () -> Unit = {};
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowChatScreen(x : Messenger.Chat, viewer: Int, goBackFun : () -> Unit){
-   /* val imeState = rememberImeState()
-    val scrollState = rememberScrollState()
-    LaunchedEffect(key1 = imeState.value){
-        if(imeState.value) {
-            scrollState.scrollTo(scrollState.maxValue)
-        }
-    }*/
-
-
+    /* val imeState = rememberImeState()
+     val scrollState = rememberScrollState()
+     LaunchedEffect(key1 = imeState.value){
+         if(imeState.value) {
+             scrollState.scrollTo(scrollState.maxValue)
+         }
+     }*/
     var recompose by rememberSaveable { mutableStateOf(0) }
+    val listState = rememberLazyListState()
 
-        println("RECOMPOSE CHAT " + recompose)
-        //System.out.println("Viwer ? + " + viewer.toString() + Logic.User.container.get(viewer).getName())
-        //
-        /// hm if somebody sends you a message what do you do?
-        /// I suggest to store such a variable
-        Column(/*modifier = Modifier.fillMaxHeight().fillMaxWidth().background(color = Color.Blue)*/
-        )  {
 
-            Scaffold(
-                topBar = {
-                    CenterAlignedTopAppBar(
-                        title = {
-                            Text(
-                                Logic.User.container.get(x.getOpposite(viewer)).getName(),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.titleMedium
+
+
+
+
+    System.out.println(getRoot(navController));
+    System.out.println("ShowChatScreen");
+    val state = rememberLazyListState()
+
+
+    val coroutineScope = rememberCoroutineScope()
+
+    var loaded by remember {mutableStateOf(false)}
+    loaded = false;
+
+
+    // System.out.println("Viwer ? + " + viewer.toString() + Logic.User.container.get(viewer).getName())
+    //
+    /// hm if somebody sends you a message what do you do?
+    /// I suggest to store such a variable
+    LaunchedEffect(loaded) {
+        coroutineScope.launch {
+            state.animateScrollToItem(
+                index = kotlin.math.max(0, state.layoutInfo.totalItemsCount)
+            )
+        }
+    }
+    Column(/*modifier = Modifier.fillMaxHeight().fillMaxWidth().background(color = Color.Blue)*/
+    )  {
+
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            User.getContainer().get(x.getOpposite(viewer)).getName(),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { goBackFun()}) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBack,
+                                contentDescription = "Localized description"
                             )
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = { goBackFun()}) {
-                                Icon(
-                                    imageVector = Icons.Filled.ArrowBack,
-                                    contentDescription = "Localized description"
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = {
+                            //TODO change here to user
+                            ProfileViewModel.showExecutorFromChat(Executor.container.get(x.getOpposite(viewer)))
+                        }) {
+                            /* Icon(
+                                imageVector = Icons.Filled.Favorite,
+                                contentDescription = "Localized description"
+                            )*/
+                            LoadImageFromUrlExample(
+                                imageUrl = User.getContainer().get(
+                                    x.getOpposite(
+                                        viewer
+                                    )
+                                ).getPhoto().getPhotoURL(), modifier = Modifier
+                                    .size(30.dp)
+                                    .clip(
+                                        CircleShape
+                                    )
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = messageBackView)
+                )
+            },
+            content = { innerPadding ->
+
+                val debug = false;
+                if(debug) {
+                    Column {
+                        val messages: ArrayList<Messenger.Message>? = x.getMessages();
+
+                        LazyColumn(state = state) {
+                            items(100) {
+                                Text(
+                                    text = "$it",
+                                    modifier = Modifier.fillMaxWidth(),
                                 )
                             }
-                        },
-                        actions = {
-                            IconButton(onClick = {
-                                //TODO change here to user
-                                ProfileViewModel.showExecutorFromChat(Logic.Executor.container.get(x.getOpposite(viewer)))
-                            }) {
-                                /* Icon(
-                                    imageVector = Icons.Filled.Favorite,
-                                    contentDescription = "Localized description"
-                                )*/
-                                LoadImageFromUrlExample(
-                                    imageUrl = Logic.User.container.get(
-                                        x.getOpposite(
-                                            viewer
-                                        )
-                                    ).getPhoto().getPhotoURL(), modifier = Modifier
-                                        .size(30.dp)
-                                        .clip(
-                                            CircleShape
-                                        )
-                                )
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(containerColor = messageBackView)
-                    )
-                },
-                content = { innerPadding ->
+                            loaded = true;
+                        }
 
-                    Box {
+                    }
+                }else {
+                    val messages: ArrayList<Messenger.Message>? = x.getMessages();
 
-                        Column() {
-                            Spacer(Modifier.height(8.dp))
-                            LazyColumn(
-                                contentPadding = innerPadding,
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                val messages: ArrayList<Messenger.Message>? = x.getMessages();
-                                if (messages != null) {
-                                    items(messages) { message ->
+                    Column() {
+                        Spacer(Modifier.height(8.dp))
+                        var recompose1 by remember{mutableStateOf(0)}
 
-                                        val sender: Int = message.sender;
-                                        val side: UserMessageSide =
-                                            (if (sender == viewer) UserMessageSide.SENDER else UserMessageSide.RECEIVER);
-                                        DisplayMessage(
-                                            message.text,
-                                            side,
-                                            Logic.User.container.get(sender).getPhoto()
-                                        );
+                        recomposeShowChatScreen =  {
+                            System.out.println("recomposeShowChatScreen");
+                            recompose = 1 - recompose;
+                            recompose1 = 1 - recompose1;
+                        }
 
+                        println("RECOMPOSE CHAT " + recompose + " " + messages?.size.toString());
+                        LazyColumn(
+                            contentPadding = PaddingValues(horizontal = 5.dp, vertical = 110.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            state = state
+                        ) {
+                            if (messages != null) {
+                                items(messages) { message ->
+                                    if(recompose1 == 5){
+                                        Text("hey")
+                                    }
+                                    val sender: Int = message.sender;
+                                    val side: UserMessageSide =
+                                        (if (sender == viewer) UserMessageSide.SENDER else UserMessageSide.RECEIVER);
+                                    DisplayMessage(
+                                        message.text,
+                                        side,
+                                        User.getContainer().get(sender).getPhoto()
+                                    );
+                                    if (message == messages[messages.size - 1]) {
+
+                                        loaded = true;
                                     }
                                 }
 
                             }
-                            Spacer(Modifier.height(80.dp))
+
                         }
-
+                        Spacer(Modifier.height(50.dp))
                     }
-                },
-                bottomBar = {
-                    var text by rememberSaveable { mutableStateOf("") }
-                    var showSuggest by rememberSaveable { mutableStateOf(false) }
-                    var buttonClick by rememberSaveable { mutableStateOf(false) }
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        Spacer(Modifier.height((getHeight() - 100).dp))
 
-                        Row(
+                }
+            },
+            bottomBar = {
+                var text by rememberSaveable { mutableStateOf("") }
+                var showSuggest by rememberSaveable { mutableStateOf(false) }
+                var buttonClick by rememberSaveable { mutableStateOf(false) }
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Spacer(Modifier.height((getHeight() - 100).dp).background(color = Color.Green))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp)
+                    ) {
+                        Spacer(
+                            Modifier
+                                .width(10.dp)
+                        )
+                        TextField(
+                            value = text,
+                            onValueChange = {
+                                text = it
+                            },
+                            shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 20.dp),
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(60.dp)
-                        ) {
-                            Spacer(
-                                Modifier
-                                    .width(10.dp)
-                            )
-                            TextField(
-                                value = text,
-                                onValueChange = {
-                                    text = it
-                                },
-                                shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 20.dp),
-                                modifier = Modifier
-                                    .height(80.dp)
-                                    .width(getWidth().dp - 80.dp),
-                                placeholder = { Text(text = "Type a message") },
-                                textStyle = messageFont
+                                .height(80.dp)
+                                .width(getWidth().dp - 80.dp),
+                            placeholder = { Text(text = "Type a message") },
+                            textStyle = messageFont
 
-                            )
+                        )
 
-                            Spacer(
-                                Modifier
-                                    .width(10.dp)
-                            )
-                            Column(modifier = Modifier.fillMaxSize()) {
-                                Spacer(Modifier.height(5.dp))
-                                IconButton(
-                                    onClick = {
-                                        buttonClick = !buttonClick
-                                        sendMessage(
-                                            x,
-                                            Messenger.Message(
-                                                text,
-                                                "Today",
-                                                x.getId(),
-                                                viewer
-                                            )
-                                        );
-                                        text = ""
-                                        recompose = 1 - recompose
-                                    }, modifier = Modifier
+                        Spacer(
+                            Modifier
+                                .width(10.dp)
+                        )
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            Spacer(Modifier.height(5.dp))
+                            IconButton(
+                                onClick = {
+                                    buttonClick = !buttonClick
+                                    sendMessage(
+                                        x,
+                                        Messenger.Message(
+                                            text,
+                                            "Today",
+                                            x.getId(),
+                                            viewer
+                                        )
+                                    );
+                                    loaded = !loaded;
+                                    text = ""
+                                    recompose = 1 - recompose
+                                }, modifier = Modifier
+                                    .width(50.dp)
+                                    .height(50.dp)
+                                    .clip(
+                                        CircleShape
+                                    )
+
+
+
+                            ) {
+
+                                Icon(
+                                    painter = painterResource(R.drawable.send_button),
+                                    contentDescription = null,
+                                    modifier = Modifier
                                         .width(50.dp)
                                         .height(50.dp)
-                                        .background(Color.White)
-                                        .clip(
-                                            CircleShape
-                                        )
-                                        .border(2.dp, messageBackView)
-
-
-                                ) {
-
-                                    Icon(
-                                        painter = painterResource(R.drawable.right_arrow),
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .width(50.dp)
-                                            .height(50.dp)
-                                    )
-                                }
-
+                                )
                             }
 
                         }
 
-                        Spacer(
-                            Modifier
-                                .height(200.dp)
-                                .fillMaxWidth()
-                                .background(Color(0xFFf2f2f2)))
                     }
+
+                    Spacer(
+                        Modifier
+                            .height(200.dp)
+                            .fillMaxWidth()
+                            .background(Color(0xFFf2f2f2)))
                 }
-            )
-        }
+            }
+        )
+    }
 }
 
 @Composable
 fun check(x: MutableState<Int>) {
     sleep(200)
     x.value += 1
-
-
-
-    // Display the value of x and name using the Text composable
 
     Text("Number is ${x.value}")
 }
@@ -414,7 +469,7 @@ fun Counter(x: Messenger.Chat, viewer: Int) {
     val recompose = remember { mutableStateOf(0) }
 
     Button(onClick = {
-         MessageModel.sendMessage(
+        MessageModel.sendMessage(
             x,
             Messenger.Message(
                 "I'm high today",
@@ -438,17 +493,8 @@ fun Counter(x: Messenger.Chat, viewer: Int) {
 @Preview
 @Composable
 fun demonstrate(){
-
-    val executor: Logic.Executor = Logic.Executor.container.getFirst();
-    val client: Logic.Executor = Logic.Executor.container.get(53243);
-    val chat: Messenger.Chat = Messenger.startCommunication(client.getId(), executor.getId())
-  //  uploadModel.addChat(chat);
-    var va: MutableState<Messenger.Chat> = remember { mutableStateOf(chat) }
-    System.out.println(chat.getId().toString()+ " A: " + chat.getA().toString() + " B: " + chat.getB().toString());
-    assert((chat.getA() == client.getId() || chat.getA() == executor.getId())
-            && (chat.getB() == client.getId() || chat.getB() == executor.getId()));
-   // ShowChatScreen(chat, executor.getId())
-    ShowChats(executor)
+    System.out.println("hey hey hey\n");
+    navController.navigate("chat");
 }
 
 @Composable
@@ -509,93 +555,100 @@ fun shortMessage(chat : Messenger.Chat, viewer : Int) : String{
     return text.substring(0, min(text.length, 20)) + "..."
 }
 
-
+var debug = true;
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShowChats(user : Logic.User){
+fun ShowChats(user : User){
     val userId : Int = user.getId()
+
+
     val allChats = Messenger.userChat.get(userId)
 
     var showSpecificChat by rememberSaveable{mutableStateOf(false)}
     var chatToShow by remember {mutableStateOf(Messenger.Chat())}
     val backStackEntry = navController.currentBackStackEntryAsState()
     println("DEBUG: " + backStackEntry.value)
-    if(showSpecificChat == true){
-        val toDo : () -> Unit =  {showSpecificChat = false}
-        ShowChatScreen(chatToShow, user.getId(), toDo)
-    }else {
-        Scaffold(
-            topBar = {
-                MediumTopAppBar(
-                    title = {
-                        Text(
-                            "Chats",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.headlineLarge
-                        )
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = messageBackView)
-                )
-            },
-            content = { innerPadding ->
-                if(allChats.isEmpty()){
-                    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
-                        Text("No messages", style = MaterialTheme.typography.titleMedium)
-                    }
-                } else {
-                    LazyColumn(
-                        contentPadding = innerPadding,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(allChats) { chat ->
-                            val op: Logic.User = Logic.User.container.get(
-                                Messenger.Chats.container.get(chat)!!.getOpposite(user.getId())
-                            )
-                            ListItem(
-                                headlineContent = {
-                                    Text(
-                                        text = op.getName(),
-                                        style = MaterialTheme.typography.headlineSmall
-                                    )
-                                },
-                                leadingContent = {
-                                    Column() {
-                                        LoadImageFromUrlExample(
-                                            imageUrl = op.getPhoto().getPhotoURL(),
-                                            modifier = Modifier
-                                                .size(70.dp)
-                                                .clip(
-                                                    CircleShape
-                                                )
-                                        )
-                                    }
+    val toDo : () -> Unit =  {navController.navigate("chat");}
 
-                                },
-                                supportingContent = {
-                                    /// last Message
-                                    Text(
-                                        shortMessage(
-                                            Messenger.Chats.container.get(chat)!!,
-                                            user.getId()
-                                        )
+    if(debug == true){
+
+        Messenger.startCommunication(user.getId(), 3)
+    }
+
+    Scaffold(
+        topBar = {
+            MediumTopAppBar(
+                title = {
+                    Text(
+                        "Chats",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.headlineLarge
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = messageBackView)
+            )
+        },
+        content = { innerPadding ->
+            System.out.println("We are here\n");
+            if(allChats == null || allChats.isEmpty()){
+                Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
+                    Text("No messages", style = MaterialTheme.typography.titleMedium)
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = innerPadding,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(allChats) { chat ->
+                        val op: User = User.getContainer().get(
+                            Messenger.Chats.container.get(chat)!!.getOpposite(user.getId())
+                        )
+                        ListItem(
+                            headlineContent = {
+                                Text(
+                                    text = op.getName(),
+                                    style = MaterialTheme.typography.headlineSmall
+                                )
+                            },
+                            leadingContent = {
+                                Column() {
+                                    LoadImageFromUrlExample(
+                                        imageUrl = op.getPhoto().getPhotoURL(),
+                                        modifier = Modifier
+                                            .size(70.dp)
+                                            .clip(
+                                                CircleShape
+                                            )
                                     )
-                                },
-                                modifier = Modifier.clickable(onClick = {
-                                    chatToShow = Messenger.Chats.get(chat)
-                                    showSpecificChat = true
-                                })
-                            )
-                        }
+                                }
+
+                            },
+                            supportingContent = {
+                                /// last Message
+                                Text(
+                                    shortMessage(
+                                        Messenger.Chats.container.get(chat)!!,
+                                        user.getId()
+                                    )
+                                )
+                            },
+                            modifier = Modifier.clickable(onClick = {
+                                // chatToShow = Messenger.Chats.get(chat)
+                                navController.navigate("chats/"+op.getId());
+
+                            })
+                        )
                     }
                 }
-            },
-            bottomBar = {
-                BottomBar()
             }
-        )
-    }
+        },
+        bottomBar = {
+            BottomBar()
+        }
+    )
 }
+
 @Preview
 @Composable
 fun checkout(){

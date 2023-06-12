@@ -23,6 +23,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,11 +32,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,33 +53,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TextField
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.firstprojecttry.Logic.Executor
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.input.KeyboardType
 import com.example.firstprojecttry.Logic.Client
 import com.example.firstprojecttry.Logic.DescriptionCharacteristicField
-import com.example.firstprojecttry.Logic.DescriptionCharacteristicField.getField
 import com.example.firstprojecttry.Logic.DescriptionCharacteristicField.getFieldValue
-import com.example.firstprojecttry.Logic.clientDescriptionNames
-import com.example.firstprojecttry.Logic.descriptionMap
-import com.example.firstprojecttry.Logic.descriptionStates
-import com.example.firstprojecttry.Logic.executorDescriptionNames
+import com.example.firstprojecttry.Logic.DescriptionType
+import com.example.firstprojecttry.Logic.Executor
+import com.example.firstprojecttry.Logic.Schedule
+import com.example.firstprojecttry.Logic.UtilityClass.clientDescriptionNames
+import com.example.firstprojecttry.Logic.UtilityClass.descriptionMap
+import com.example.firstprojecttry.Logic.UtilityClass.descriptionStates
+import com.example.firstprojecttry.Logic.UtilityClass.executorDescriptionNames
+import com.example.firstprojecttry.Login.AuthViewModel
+import com.example.firstprojecttry.ui.theme.Purple80
 import kotlinx.coroutines.launch
-import java.lang.Error
-import java.util.Date
 import java.text.SimpleDateFormat
+import java.util.Date
+
 
 @Composable
 fun LoadImageFromUrlExample(imageUrl: String, contentScale: ContentScale = ContentScale.None, modifier: Modifier = Modifier) {
@@ -206,10 +211,12 @@ fun DescriptionItem(title: String, name: String, fieldValue: String?, last: Bool
                     Text(
                         text = if (type.name == "DATE")  {
                             val date = Date(textValue.toLong())
-                            val dateFormat = SimpleDateFormat("MM-DD-YYYY") // Define the desired date format
+                            val dateFormat = SimpleDateFormat("MM-dd-yyyy") // Define the desired date format
                             dateFormat.format(date)
                         }
-                            else { text.value },
+                            else {
+                                if(name == "price") text.value + "$"
+                                 else text.value},
                         color = colorResource(id = R.color.purple_500)
                     )
                 },
@@ -233,7 +240,7 @@ fun DescriptionItem(title: String, name: String, fieldValue: String?, last: Bool
     if (selected.value) {
 
         CharacteristicChangeSheet(
-            descriptionField = Logic.descriptionMap[name]!!,
+            descriptionField = descriptionMap[name]!!,
             fieldBody = text,
             selected = selected,
             onClickSave = {
@@ -248,14 +255,14 @@ fun DescriptionItem(title: String, name: String, fieldValue: String?, last: Bool
 fun handleStringInput(
     fieldBody: String,
     changeError: (Boolean) -> (Unit) = {},
-    type: Logic.DescriptionType,
+    type: DescriptionType,
     restrictionSize: Int,
     symbolsCount: Int,
     onError : (Boolean) -> (Unit) = {}
 ) {
     changeError(false);
     onError(true);
-    if (type == Logic.DescriptionType.STRING) {
+    if (type == DescriptionType.STRING) {
         changeError(symbolsCount > restrictionSize)
         onError(symbolsCount <= restrictionSize);
     } else {
@@ -286,7 +293,7 @@ fun CharacteristicChangeSheet(
     selected: MutableState<Boolean>,
     singleLine: Boolean = true,
     onClickSave: () -> Unit,
-    type: Logic.DescriptionType,
+    type: DescriptionType,
 ) {
     var restrictionSize = descriptionField.restrictionValue
     val scope = rememberCoroutineScope()
@@ -336,7 +343,7 @@ fun CharacteristicChangeSheet(
                             .fillMaxWidth()
                             .padding(top = 35.dp),
                         supportingText = {
-                            if (type == Logic.DescriptionType.STRING) {
+                            if (type == DescriptionType.STRING) {
                                 Text(
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = TextAlign.End, text = "$symbolsCount/$restrictionSize characters"
@@ -356,7 +363,7 @@ fun CharacteristicChangeSheet(
                         keyboardOptions = KeyboardOptions(
                             autoCorrect = false,
                             keyboardType =
-                            if (type == Logic.DescriptionType.STRING){
+                            if (type == DescriptionType.STRING){
                                 KeyboardType.Text
                             } else {
                                 KeyboardType.Number
@@ -464,7 +471,7 @@ fun AvailabilityBlock(executor : MutableState<Executor>, changeable: Boolean = t
     var selectedGrid = rememberSaveable{ mutableStateOf(false)}
 
     var stateGrid = rememberSaveable{mutableStateOf(HashMap<String, MutableState<Boolean>>())}
-    for (i in Logic.Schedule.keyNames) {
+    for (i in Schedule.keyNames) {
         stateGrid.value[i] = rememberSaveable{ mutableStateOf(executor.value.schedule.scheduleMap[i]!!) }
     }
 
@@ -502,12 +509,12 @@ fun AvailabilityBlock(executor : MutableState<Executor>, changeable: Boolean = t
     )
     if (selectedGrid.value) {
         var state = rememberSaveable{mutableStateOf(HashMap<String, MutableState<Boolean>>())}
-        for (i in Logic.Schedule.keyNames) {
+        for (i in Schedule.keyNames) {
             state.value[i] = rememberSaveable{ mutableStateOf(stateGrid.value[i]!!.value) }
         }
         GridChangeSheet(state, selectedGrid, onClickSave = {
             var toex : MutableMap<String, Boolean> = HashMap();
-            for (i in Logic.Schedule.keyNames) {
+            for (i in Schedule.keyNames) {
                 stateGrid.value[i]!!.value = state.value[i]!!.value
                 toex[i] = state.value[i]!!.value
             }
@@ -521,6 +528,7 @@ fun AvailabilityBlock(executor : MutableState<Executor>, changeable: Boolean = t
 @Preview
 @Composable
 fun PreviewProfilePage() {
+
     var type: Int = try{
         var value = AuthViewModel.getCurrentUser() as Executor
 
@@ -536,18 +544,36 @@ fun PreviewProfilePage() {
             2;
         }
     }
-    if (type.equals(0)) {
+    if (type == 0) {
         val user = remember {
             mutableStateOf(AuthViewModel.getCurrentUser() as Client)
         }
         ProfileClientPage(client = user)
-    } else if (type.equals(1)){
+    } else if (type == 1){
         val value = AuthViewModel.getCurrentUser() as Executor
         val user = remember {
             mutableStateOf(value)
         }
         ProfileExecutorPage(executor = user)
     }
+
+     /*
+    var executor = remember{ mutableStateOf(Logic.Executor(
+        4,
+        "Elizabeth Mitchi",
+
+        Logic.Description(),
+        Logic.Schedule(),
+        30,
+        Logic.Photo(),
+        Logic.Side.EXECUTORHOME,
+        Logic.Location(50.065081, 19.923790)
+    )) }
+
+
+    ProfileExecutorPage(executor, MaterialTheme)
+
+     */
 }
 
 
@@ -658,8 +684,11 @@ fun ExecutorCard(executor: MutableState<Executor>, theme: MaterialTheme = Materi
                             .fillMaxWidth()
                     ) {
                         for (name in listNames) {
-                            if (name != "photoURL" && name != "scheduleMap") {
-                                DescriptionItem(title = descriptionMap[name]!!.descriptionTitle, name = name, fieldValue = getFieldValue(name, executor.value)?.toString(), changeable = false)
+                            val type = descriptionMap[name]!!.type
+                            System.out.println("W " + type.name)
+                            if (type in arrayListOf(DescriptionType.NUMBER, DescriptionType.STRING,
+                                    DescriptionType.DATE, DescriptionType.CHECKBOX)
+                            ) {    DescriptionItem(title = descriptionMap[name]!!.descriptionTitle, name = name, fieldValue = getFieldValue(name, executor.value)?.toString(), changeable = false)
                             }
                         }
                     }
@@ -680,6 +709,7 @@ fun ProfileExecutorPage(executor: MutableState<Executor>, theme: MaterialTheme =
     if (executor.value.photo.photoURL == null) {
         executor.value.photo.photoURL = ""
     }
+
     var photoURL = rememberSaveable {mutableStateOf(executor.value.photo.photoURL)}
 
     var imageUriState = remember{mutableStateOf<Uri?> (null)}
@@ -789,7 +819,10 @@ fun ProfileExecutorPage(executor: MutableState<Executor>, theme: MaterialTheme =
                             .fillMaxWidth()
                     ) {
                         for (name in listNames) {
-                            if (name != "photoURL" && name != "scheduleMap") {
+                            val type = descriptionMap[name]!!.type
+                            if (type in arrayListOf<DescriptionType>(DescriptionType.NUMBER, DescriptionType.STRING,
+                                                                            DescriptionType.DATE, DescriptionType.CHECKBOX)
+                            ) {
                                 DescriptionItem(title = descriptionMap[name]!!.descriptionTitle, name = name, fieldValue = getFieldValue(name, executor.value)?.toString())
                             }
                         }
@@ -797,15 +830,52 @@ fun ProfileExecutorPage(executor: MutableState<Executor>, theme: MaterialTheme =
                 }
             )
             AvailabilityBlock(executor = executor)
+            LogOut()
         }
     }
 
 }
 
 
+@Preview
+@Composable
+fun LogOut() {
+    Row(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        IconButton(onClick = {
+            AuthViewModel.logOut();
+        },
+            modifier = Modifier.padding(top = 30.dp, bottom = 30.dp)
+                .fillMaxWidth().background(Purple80)
+
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ExitToApp,
+                    contentDescription = "Log out",
+                    modifier = Modifier
+                        .padding(start = 15.dp)
+                        .size(50.dp),
+                    tint = Color.White
+                )
+                Text(
+                    "Leave",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(start = 15.dp),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
-fun ProfileClientPage(client: MutableState<Logic.Client>, theme: MaterialTheme = MaterialTheme) {
+fun ProfileClientPage(client: MutableState<Client>, theme: MaterialTheme = MaterialTheme) {
     descriptionStates.clear();
     var listNames = executorDescriptionNames;
     if (client.value.photo.photoURL == null) {
@@ -920,14 +990,21 @@ fun ProfileClientPage(client: MutableState<Logic.Client>, theme: MaterialTheme =
                             .fillMaxWidth()
                     ) {
                         for (name in listNames) {
-                            if (name != "photoURL" && name != "scheduleMap") {
+                            val type = descriptionMap[name]!!.type
+                            if (type in arrayListOf<DescriptionType>(DescriptionType.NUMBER, DescriptionType.STRING,
+                                    DescriptionType.DATE, DescriptionType.CHECKBOX)
+                            ) {
                                 DescriptionItem(title = descriptionMap[name]!!.descriptionTitle, name = name, fieldValue = getFieldValue(name, client.value)?.toString())
                             }
                         }
                     }
                 }
             )
+            LogOut()
         }
     }
 
 }
+
+
+
