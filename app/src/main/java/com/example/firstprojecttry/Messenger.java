@@ -22,15 +22,17 @@ public class Messenger {
         return chat.getMessages().size();
     }
     public static Chat startCommunication(Integer userA, Integer userB){
-        for(Integer chatid : userChat.get(userA)){
-            if(Chats.get(chatid).getA() == userB || Chats.get(chatid).getB() == userB){
-                return Chats.get(chatid);
+        if (userChat.get(userA) != null) {
+            for (Integer chatid : userChat.get(userA)) {
+                if (Chats.get(chatid).getA() == userB || Chats.get(chatid).getB() == userB) {
+                    return Chats.get(chatid);
+                }
             }
-            System.out.println(userA + " chat " + chatid + " B: " + Chats.get(chatid).getA() + ", " + Chats.get(chatid).getB());
         }
         Chat created = new Chat(userA, userB);
 
         uploadModel.addChat(created);
+        Chats.update(created.id, created);
         return created;
     }
     static Integer last_available = 0;

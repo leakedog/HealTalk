@@ -260,14 +260,14 @@ fun ShowChatScreen(x : Messenger.Chat, viewer: Int, goBackFun : () -> Unit){
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
-                            User.getContainer().get(x.getOpposite(viewer)).getName(),
+                            User.getContainer().get(x.getOpposite(viewer)).name,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.titleMedium
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = { goBackFun()}) {
+                        IconButton(onClick = {println("GOING BACK"); goBackFun()}) {
                             Icon(
                                 imageVector = Icons.Filled.ArrowBack,
                                 contentDescription = "Localized description"
@@ -567,13 +567,8 @@ fun ShowChats(user : User){
     var showSpecificChat by rememberSaveable{mutableStateOf(false)}
     var chatToShow by remember {mutableStateOf(Messenger.Chat())}
     val backStackEntry = navController.currentBackStackEntryAsState()
-    println("DEBUG: " + backStackEntry.value)
     val toDo : () -> Unit =  {navController.navigate("chat");}
 
-    if(debug == true){
-
-        Messenger.startCommunication(user.getId(), 3)
-    }
 
     Scaffold(
         topBar = {
@@ -635,7 +630,7 @@ fun ShowChats(user : User){
                             },
                             modifier = Modifier.clickable(onClick = {
                                 // chatToShow = Messenger.Chats.get(chat)
-                                navController.navigate("chats/"+op.getId());
+                                navController.navigate("chats/"+op.id);
 
                             })
                         )

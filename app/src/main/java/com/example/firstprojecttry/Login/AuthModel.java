@@ -3,6 +3,7 @@ package com.example.firstprojecttry.Login;
 import static android.content.ContentValues.TAG;
 
 import android.util.Log;
+import android.util.Patterns;
 
 import androidx.annotation.NonNull;
 import androidx.compose.runtime.MutableState;
@@ -13,7 +14,10 @@ import com.example.firstprojecttry.PublicKey;
 import com.google.android.gms.auth.api.identity.BeginSignInRequest;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.EmailAuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -24,7 +28,18 @@ public class AuthModel {
     private static BeginSignInRequest signInRequest;
     public static String token = null;
 
+    public static boolean validateEmail(String email) {
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            return false;
+        }
+        return true;
+    }
+
     public static void login(String email, String password, MutableState<Boolean> error) {
+        if (!validateEmail(email) || Objects.equals(password, "")) {
+            AuthViewModel.handleErrorLogin(error);
+            return;
+        }
         // Assuming you're using Firebase Authentication
 
         // Check if the user is already signed in
@@ -57,7 +72,15 @@ public class AuthModel {
     }
 
 
-    public static void register(String email, String password, MutableState<Boolean> error) {
+    public static void register(String email, String password, MutableState<Boolean> error,  MutableState<String> errorString) {
+        if(!validateEmail(email)) {
+            AuthViewModel.handleErrorRegistration(error, errorString, "Incorrect email");
+            return;
+        }
+        if (Objects.equals(password, "")) {
+            AuthViewModel.handleErrorRegistration(error, errorString, "Password is empty");
+            return;
+        }
         try {
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
@@ -69,7 +92,7 @@ public class AuthModel {
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                        AuthViewModel.handleErrorRegistration(error);
+                        AuthViewModel.handleErrorRegistration(error, errorString, task.getException().getMessage());
                     }
                 }
             });
@@ -80,6 +103,7 @@ public class AuthModel {
     }
     // Method to retrieve the user's token
     public static void getCurrentUserToken(MutableState<Boolean> error) {
+        System.out.println("getCurrentUserToken");
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             System.out.println("Waiting");
@@ -91,9 +115,7 @@ public class AuthModel {
         }
     }
     public static void startApplication() {
-        System.out.println("Start");
         if (mAuth.getCurrentUser() != null) {
-            System.out.println("WTFF");
             AuthViewModel.isWaiting = true;
             AuthViewModel.isWaitingLoading = true;
             getCurrentUserToken(null);
@@ -105,20 +127,26 @@ public class AuthModel {
     }
 
     public static User getCurrentUser() {
-        System.out.println("DEBUG");
-        System.out.println(PublicKey.getKeys());
-        System.out.println(token);
+        System.out.println(PublicKey.getPublicId(token));
         if (PublicKey.getPublicId(token) == null) {
             logOut();
             AuthViewModel.handleError();
             return null;
         }
-        System.out.println(PublicKey.getPublicId(token));
-        //TODO find really who i am
         return User.getContainer().get(PublicKey.getPublicId(token));
     }
 
     public static void logOut() {
         mAuth.signOut();
+    }
+
+    public static void changePassword(String email, MutableState<Boolean> error, MutableState<Boolean> success) {
+        if(!validateEmail(email)) {
+            AuthViewModel.handleChangePasswordError(error);
+            return;
+        }
+
+        mAuth.sendPasswordResetEmail(email);
+        AuthViewModel.handleSuccessfulChangePassword(success);
     }
 }

@@ -87,14 +87,11 @@ public class DescriptionCharacteristicField{
     }
 
     public static Boolean checkMyClass(Class<?> o) {
-        System.out.println(o.getSimpleName());
-        System.out.println(classToCheckList);
         for (Class<?> x : classToCheckList) {
             if (o == x) {
                 return true;
             }
         }
-        System.out.println("BAD");
         return false;
     }
     public static Object getObject(String name, Object user) {
@@ -136,12 +133,10 @@ public class DescriptionCharacteristicField{
 
                 try {
                     var field = currentClass.getDeclaredField(name);
-                    System.out.println("Field " + user + " " + field);
                     field.setAccessible(true);
                     return field;
                 } catch (Exception error) {
                     for (Field field : currentClass.getDeclaredFields()) {
-                        System.out.println(field);
                         field.setAccessible(true);
                         try {
                             var result = getField(name, Objects.requireNonNull(field.get(user)));

@@ -685,7 +685,6 @@ fun ExecutorCard(executor: MutableState<Executor>, theme: MaterialTheme = Materi
                     ) {
                         for (name in listNames) {
                             val type = descriptionMap[name]!!.type
-                            System.out.println("W " + type.name)
                             if (type in arrayListOf(DescriptionType.NUMBER, DescriptionType.STRING,
                                     DescriptionType.DATE, DescriptionType.CHECKBOX)
                             ) {    DescriptionItem(title = descriptionMap[name]!!.descriptionTitle, name = name, fieldValue = getFieldValue(name, executor.value)?.toString(), changeable = false)

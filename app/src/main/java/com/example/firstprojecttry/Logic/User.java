@@ -6,7 +6,7 @@ public class User{
 
     static private Integer lastUserId = 0;
 
-    static FeedContainer<User> container = new FeedContainer<User>();
+    public static FeedContainer<User> container = new FeedContainer<User>();
     protected String token;
     protected Photo photo;
 
@@ -48,6 +48,7 @@ public class User{
     }
     public void setToken(String token){
         this.token = token;
+        System.out.println("setToken");
     }
     public void setId(int id) {
         this.id = id;

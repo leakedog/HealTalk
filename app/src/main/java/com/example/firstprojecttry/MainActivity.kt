@@ -50,6 +50,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -196,10 +197,8 @@ fun DisplayAllMarkers(marks: List<Executor>, updateStatus: (Executor) -> Unit){
             updateStatus(executor)
             checkedState = false
         }
-        println("DEBUG 1 " + executor.id)
-        println("DEBUG 2 " + executor.location)
+
         if (executor.location == null) continue;
-        println("DEBUG 3 " + executor.location.lat)
 
         Marker(
             state = MarkerState(position = LatLng(executor.location.lat, executor.location.lng)),
@@ -237,7 +236,7 @@ fun ShowMap() {
                 .padding(paddingValues)
                 .fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            properties = MapProperties(isMyLocationEnabled = true)
+            properties = MapProperties(isMyLocationEnabled = true, mapType = MapType.TERRAIN)
         ) {
             if (showExecutor.value) {
                 ProfileViewModel.showExecutor(showId)

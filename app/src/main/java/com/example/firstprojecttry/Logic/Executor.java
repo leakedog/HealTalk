@@ -66,18 +66,7 @@ public class Executor extends User implements CopyCat<Executor> {
     }
 
 
-    public Photo getPhoto(){
-        return this.photo;
-    }
-    public void setPhoto(Photo x){
-        this.photo = x;
-    }
-    public String getToken(){
-        return token;
-    }
-    public void setToken(String token){
-        this.token = this.token;
-    }
+
     public void setId(int id) {
         this.id = id;
     }

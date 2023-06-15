@@ -1,5 +1,6 @@
 package com.example.firstprojecttry
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,14 +25,20 @@ import com.example.firstprojecttry.Login.AuthViewModel
 import com.example.firstprojecttry.Login.ChooseTypePage
 import com.example.firstprojecttry.Login.ClientQuestionPage
 import com.example.firstprojecttry.Login.ExecutorQuestionPage
+import com.example.firstprojecttry.Login.ForgotPasswordScreen
 import com.example.firstprojecttry.Login.GreetingScreen
 import com.example.firstprojecttry.Login.LoginScreen
 import com.example.firstprojecttry.Login.SignUpScreen
+import com.facebook.FacebookSdk
+import com.facebook.appevents.AppEventsLogger
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+// Initialize the Facebook SDK
+// Enable auto logging of app events
         val locationPermissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
@@ -58,6 +65,7 @@ class MainActivity : ComponentActivity() {
             AuthModel.startApplication()
         }
     }
+
 }
 
 
@@ -79,6 +87,7 @@ fun MyApp(navController: NavHostController) {
             //   Thread.sleep(10000)
             demonstrate()
         }
+
         navigation(startDestination = "greeting", route = "start") {
             composable("greeting") {
                 GreetingScreen()
@@ -88,6 +97,10 @@ fun MyApp(navController: NavHostController) {
             }
             composable("registration") {
                 SignUpScreen()
+            }
+            composable("forgotPassword"){
+                //   Thread.sleep(10000)
+                ForgotPasswordScreen()
             }
 
         }
@@ -122,28 +135,29 @@ fun MyApp(navController: NavHostController) {
             ChooseTypePage();
         }
         composable("executors/{userId}",   arguments = listOf(navArgument("userId") { type = NavType.IntType })) {
-            var backStackEntry = navController.currentBackStackEntry!!;
-            var executor = remember{mutableStateOf(Executor.container.get(backStackEntry.arguments!!.getInt("userId")))}
+            val backStackEntry = navController.currentBackStackEntry!!;
+            val executor = remember{mutableStateOf(Executor.container.get(backStackEntry.arguments!!.getInt("userId")))}
             ExecutorCard(executor = executor, onGoBack = {
                 navController.navigate("search")
             })
         }
         composable("executorsFromChat/{userId}",   arguments = listOf(navArgument("userId") { type = NavType.IntType })) {
-            var backStackEntry = navController.currentBackStackEntry!!;
+            val backStackEntry = navController.currentBackStackEntry!!;
             val userId = backStackEntry.arguments!!.getInt("userId")
-            var executor = remember{mutableStateOf(Executor.container.get(backStackEntry.arguments!!.getInt("userId")))}
+            val executor = remember{mutableStateOf(Executor.container.get(backStackEntry.arguments!!.getInt("userId")))}
             ExecutorCard(executor = executor, onGoBack = {
                 navController.navigate("chats/$userId")
             }, fromChat = true)
         }
         composable("chats/{userId}",   arguments = listOf(navArgument("userId") { type = NavType.IntType })) {
-            var backStackEntry = navController.currentBackStackEntry!!
+            val backStackEntry = navController.currentBackStackEntry!!
             val userId = backStackEntry.arguments!!.getInt("userId")
             ShowChatScreen(
                 x = Messenger.startCommunication(
-                    AuthModel.getCurrentUser().getId(),
+                    AuthModel.getCurrentUser().id,
                     userId
-                ), viewer = AuthModel.getCurrentUser().getId(), goBackFun = {
+                ), viewer = AuthModel.getCurrentUser().id, goBackFun = {
+                    System.out.println("FUNCTION GOING BACK")
                     navController.navigate("chat")
                 })
         }

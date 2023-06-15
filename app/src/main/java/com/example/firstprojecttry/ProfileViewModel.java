@@ -5,6 +5,7 @@ import static com.example.firstprojecttry.Logic.UtilityClass.descriptionStates;
 
 
 import android.net.Uri;
+import android.util.Log;
 
 import androidx.compose.runtime.MutableState;
 import androidx.navigation.NavController;
@@ -48,17 +49,18 @@ public class ProfileViewModel {
             Thread.sleep(100);
         }
         var user = AuthModel.getCurrentUser();
-
+        System.out.println(descriptionStates);
         for (var x : descriptionStates.entrySet()) {
+            if (x.getValue() == null) continue;
             try {
                 var value = x.getValue();
                 Field field = DescriptionCharacteristicField.getField(x.getKey(), user);
-                assert field != null;
                 field.setAccessible(true);
                 var hisClass = field.getType();
                 if (hisClass == Integer.class) {
                     value = Integer.valueOf((String) value);
                 }
+                System.out.println(field.getName() + " = " + value);
                 field.set(DescriptionCharacteristicField.getObject(x.getKey(), user), hisClass.cast(value));
             }catch (Exception e) {
                 System.out.println("ERROR " + e.getMessage() + " " + "WWW ? " + x.getKey());
@@ -67,7 +69,6 @@ public class ProfileViewModel {
         for (var x : descriptionMap.entrySet()) {
             try {
                 Field field = DescriptionCharacteristicField.getField(x.getKey(), user);
-                assert field != null;
                 field.setAccessible(true);
 
                 System.out.println("UploadExecutor fieldName "  + x.getKey() +  ": " + field.get(DescriptionCharacteristicField.getObject(x.getKey(), user)));
@@ -81,11 +82,11 @@ public class ProfileViewModel {
     public static void firstUploadUser(Integer Type) throws InterruptedException {
         // Type == 0 Client, otherwise User
         User user;
-        if (AuthModel.token == null) {
+        if (AuthModel.token == null || AuthModel.token.equals("")) {
             AuthViewModel.isWaiting = true;
             AuthViewModel.loadToken();
         }
-        while (AuthModel.token == null) {
+        while (AuthModel.token == null || AuthModel.token.equals("")) {
             Thread.sleep(100);
         }
         if (Type == 0) {
@@ -93,8 +94,9 @@ public class ProfileViewModel {
         } else {
             user = new Executor();
         }
+        System.out.println("TOKEN: " + AuthModel.token);
         user.setToken(AuthModel.token);
-        System.out.println(user.getToken() + " "  + user.getId());
+        System.out.println("TOKEN + ID: " + user.getToken() + " "  + user.getId());
         PublicKey.update(user.getToken(), user.getId());
         uploadModel.addPublicKey(user.getToken(), user.getId());
 
@@ -123,7 +125,7 @@ public class ProfileViewModel {
                 System.out.println("ERROR " + e.getMessage() + " descriptionMap " + x.getKey());
             }
         }
-        User.getContainer().update(user.getId(), user);
+        User.container.update(user.getId(), user);
         if (Type == 0) {
             Client.container.update(user.getId(), (Client) user);
         } else {

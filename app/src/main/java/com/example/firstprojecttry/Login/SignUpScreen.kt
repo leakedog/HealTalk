@@ -1,5 +1,12 @@
 package com.example.firstprojecttry.Login
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,17 +35,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat.startActivity
+import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.test.core.app.ApplicationProvider.getApplicationContext
+import com.example.firstprojecttry.MainActivity
 import com.example.firstprojecttry.R
 
 
 @Composable
 fun SignUpScreen() {
+
+
     var erorr = remember { mutableStateOf(false) }
     Column(
         Modifier
@@ -86,6 +100,7 @@ fun SignUpScreen() {
             )
             var email by rememberSaveable { mutableStateOf("") }
             var password by rememberSaveable { mutableStateOf("") }
+            var errorString = remember { mutableStateOf("") }
             OutlinedTextField(
                 value = email,
                 onValueChange = {
@@ -98,9 +113,6 @@ fun SignUpScreen() {
                     .padding(top = 50.dp),
                 isError = erorr.value,
                 supportingText = {
-                    if (erorr.value) {
-                        Text("Incorrect email")
-                    }
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email
@@ -119,9 +131,10 @@ fun SignUpScreen() {
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
+
             Button(
                 onClick = {
-                    AuthViewModel.tryRegister(email, password, erorr)
+                    AuthViewModel.tryRegister(email, password, erorr, errorString)
                 },
                 modifier = Modifier
                     .padding(top = 60.dp)
@@ -129,36 +142,15 @@ fun SignUpScreen() {
             ) {
                 Text("Sign Up")
             }
-            Text(
-                text = "Forgot Password?",
-                modifier = Modifier
-                    .padding(top = 20.dp)
-                    .fillMaxWidth(),
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium, color = Color.Gray
-
-            )
+            if (erorr.value) {
+                Text(modifier = Modifier.fillMaxWidth(0.6f), textAlign = TextAlign.Center, text = errorString.value, color = Color.Red)
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 30.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                    .padding(top = 30.dp)
             ) {
-                IconButton(
-
-                    modifier = Modifier.size(50.dp),
-                    onClick = {
-
-                    },
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.google),
-                        modifier = Modifier.size(50.dp),
-                        contentDescription = "Go back from edit profile",
-                    )
-                }
-
+                SocialMediaIcons(size = 50.dp)
             }
             Row(
                 Modifier.padding(top = 30.dp)

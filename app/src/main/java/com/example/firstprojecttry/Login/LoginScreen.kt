@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -133,37 +134,22 @@ fun LoginScreen() {
             ) {
                 Text("Login Now")
             }
-            Text(
-                text = "Forgot Password?",
-                modifier = Modifier
-                    .padding(top = 20.dp)
-                    .fillMaxWidth(),
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium, color = Color.Gray
-
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 30.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                IconButton(
-
-                    modifier = Modifier.size(50.dp),
-                    onClick = {
-
-                    },
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.google),
-                        modifier = Modifier.size(50.dp),
-                        contentDescription = "Go back from edit profile",
-                    )
-                }
-
+            Surface(onClick = {
+                AuthViewModel.goToForgotPassword();
             }
+            ) {
+                Text(
+                    text = "Forgot Password?",
+                    modifier = Modifier
+                        .padding(top = 20.dp)
+                        .fillMaxWidth(),
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleMedium, color = Color.Gray
+
+                )
+            }
+
             Row(
                 Modifier.padding(top = 30.dp)
             ) {

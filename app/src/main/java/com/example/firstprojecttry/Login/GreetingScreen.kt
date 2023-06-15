@@ -1,5 +1,8 @@
 package com.example.firstprojecttry.Login
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -29,6 +33,14 @@ import com.example.firstprojecttry.R
 @Preview
 @Composable
 fun GreetingScreen() {
+
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        AuthViewModel.handleActivityCode(result.resultCode)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -72,21 +84,8 @@ fun GreetingScreen() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 30.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            IconButton(
-
-                modifier = Modifier.size(50.dp),
-                onClick = {
-
-                },
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.google),
-                    modifier = Modifier.size(50.dp),
-                    contentDescription = "Go back from edit profile",
-                )
-            }
+            SocialMediaIcons(size = 50.dp)
 
         }
     }
