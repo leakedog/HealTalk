@@ -14,8 +14,8 @@ import com.example.firstprojecttry.Logic.Location
 import com.example.firstprojecttry.Logic.UtilityClass.descriptionMap
 import com.example.firstprojecttry.Logic.UtilityClass.descriptionStates
 import com.example.firstprojecttry.R
-import com.example.firstprojecttry.center
-import com.example.firstprojecttry.getBitMap
+import com.example.firstprojecttry.GoogleMap.center
+import com.example.firstprojecttry.GoogleMap.getBitMapFromImage
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -60,7 +60,7 @@ fun LocationQuestion(
             onClick = { mar ->
                 true
             },
-            icon = getBitMap(context = LocalContext.current, R.drawable.output_onlinepngtools)
+            icon = getBitMapFromImage(context = LocalContext.current, R.drawable.output_onlinepngtools)
         )
     }
 

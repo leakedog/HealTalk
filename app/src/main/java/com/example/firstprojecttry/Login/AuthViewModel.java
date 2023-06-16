@@ -1,36 +1,26 @@
 package com.example.firstprojecttry.Login;
 
+import static com.example.firstprojecttry.Navigator.NavigatorModel.*;
+
 import android.app.Activity;
 
 import androidx.compose.runtime.MutableState;
 import androidx.navigation.NavController;
 
+import com.example.firstprojecttry.Logic.Executor;
 import com.example.firstprojecttry.Logic.User;
-import com.example.firstprojecttry.Notifications;
+import com.example.firstprojecttry.Logic.UserType;
+import com.example.firstprojecttry.Notifications.Notifications;
 
 import org.jetbrains.annotations.NotNull;
 
 
 public class AuthViewModel {
-    public static NavController navController = null;
 
 
     public static boolean isWaiting = false;
     public static boolean isWaitingLoading = false;
 
-    static void showGreeting() {
-        navController.navigate("greeting");
-    }
-    static void showChat(){navController.navigate("demontt");}
-    public static void showLogin() {
-        navController.navigate("login");
-    }
-    static void showRegistration() {
-        navController.navigate("registration");
-    }
-    static void showLoading() {
-        navController.navigate("loading");
-    }
 
     public static void handleTokenError(MutableState<Boolean> error) {
         isWaiting = false;
@@ -38,7 +28,7 @@ public class AuthViewModel {
         if (error != null) {
             error.setValue(true);
         }
-        navController.navigate("error");
+        handleError();
     }
 
     public static void handleErrorRegistration(MutableState<Boolean> error,  MutableState<String> errorString, String errorStringValue) {
@@ -48,8 +38,7 @@ public class AuthViewModel {
     }
 
     public static void handleSuccessfulRegistration() {
-        System.out.println("NavigateToChoosing");
-        navController.navigate("chooseTypeClientOrExecutor");
+        showChooseType();
         AuthModel.getCurrentUserToken(null);
     }
 
@@ -66,9 +55,8 @@ public class AuthViewModel {
 
 
     public static void handleSuccessfulLogin() {
-        System.out.println("LOGGED");
         isWaiting = true;
-        navController.navigate("loading");
+        showLoading();
         AuthModel.getCurrentUserToken(null);
     }
 
@@ -79,8 +67,6 @@ public class AuthViewModel {
     }
 
     public static void handleToken() {
-        System.out.println("Token: " + AuthModel.token);
-        System.out.println(isWaiting);
         if (isWaiting) {
             isWaiting = false;
             startLogged();
@@ -124,7 +110,7 @@ public class AuthViewModel {
                 return;
             }
             Notifications.setNotificationListener(AuthViewModel.getCurrentUser().getId());
-            navController.navigate("LoggedApp"); /// loggedApp
+            showLoggedApp();
         }
 
     }
@@ -184,5 +170,15 @@ public class AuthViewModel {
 
     public static void goToForgotPassword() {
         navController.navigate("forgotPassword");
+    }
+
+
+    public static UserType getCurrentUserType() {
+        try{
+            Executor e = (Executor) getCurrentUser();
+            return UserType.EXECUTOR;
+        } catch (Exception e) {
+            return UserType.CLIENT;
+        }
     }
 }

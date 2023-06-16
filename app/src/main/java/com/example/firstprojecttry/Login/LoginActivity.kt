@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.firstprojecttry.Logic.DescriptionType
 import com.example.firstprojecttry.Logic.Schedule
+import com.example.firstprojecttry.Logic.UserType
 import com.example.firstprojecttry.Logic.UtilityClass.clientDescriptionNames
 import com.example.firstprojecttry.Logic.UtilityClass.descriptionMap
 import com.example.firstprojecttry.Logic.UtilityClass.descriptionNames
@@ -53,7 +54,7 @@ import com.example.firstprojecttry.Login.Questions.PhotoQuestion
 import com.example.firstprojecttry.Login.Questions.ScheduleQuestion
 import com.example.firstprojecttry.Login.Questions.SelectionQuestion
 import com.example.firstprojecttry.Login.Questions.StringQuestion
-import com.example.firstprojecttry.ProfileViewModel
+import com.example.firstprojecttry.Profile.ProfileViewModel
 import com.example.firstprojecttry.R
 import com.example.firstprojecttry.ui.theme.Purple40
 
@@ -178,10 +179,7 @@ fun PageIndicatorQuestions(
             Modifier
                 .padding(start = size, end = size, top = 60.dp)
         ) {
-            println(descriptionMap[descriptionNames[selectedPage]]!!.type)
-            println(descriptionNames[selectedPage])
-            println(selectedPage)
-            println(descriptionNames)
+
             val name = list[selectedPage]!!
             val field = descriptionMap[name]!!
             val typo = field.type
@@ -231,7 +229,6 @@ fun PageIndicatorQuestions(
                                 toex[i] = stateGrid.value[i]!!.value
                             }
                             descriptionStates["scheduleMap"] = toex
-                            println(descriptionStates)
                         }
                         if (selectedPage != (numberOfPages - 1)) {
                             //TODO save data
@@ -286,7 +283,7 @@ fun ExecutorQuestionPage(){
         onClick = setSelectedPage,
         selectedColor = colorResource(id = R.color.purple_500),
         onFinish = {
-            ProfileViewModel.firstUploadUser(1);
+            ProfileViewModel.firstUploadUser(UserType.EXECUTOR);
         },
         list = executorDescriptionNames
     )
@@ -310,7 +307,7 @@ fun ClientQuestionPage(){
         onClick = setSelectedPage,
         selectedColor = colorResource(id = R.color.purple_500),
         onFinish = {
-            ProfileViewModel.firstUploadUser(0);
+            ProfileViewModel.firstUploadUser(UserType.CLIENT);
         },
         list = clientDescriptionNames
     )

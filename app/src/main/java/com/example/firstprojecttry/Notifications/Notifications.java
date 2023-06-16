@@ -1,10 +1,8 @@
-package com.example.firstprojecttry;
+package com.example.firstprojecttry.Notifications;
 
 import static android.content.ContentValues.TAG;
 
-import static com.example.firstprojecttry.Messenger.userChat;
-import static com.example.firstprojecttry.ViewKt.getArg;
-import static com.example.firstprojecttry.ViewKt.getRoot;
+
 
 import android.util.Log;
 
@@ -12,21 +10,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.navigation.NavController;
 
+import com.example.firstprojecttry.Navigator.NavigatorModel;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
 public class Notifications {
     public static ArrayList<DatabaseReference> mountPoints = new ArrayList<DatabaseReference>();
-    public static NavController navController = null;
-    static void setController(NavController x){
-        navController = x;
-    }
     static Boolean initialLoad = false;
     static DatabaseReference myNotification = null;
 
@@ -41,21 +35,13 @@ public class Notifications {
                 String notificationId = snapshot.getKey();
                 DataSnapshot theNotification = snapshot.getChildren().iterator().next();
                 String notificationType = theNotification.getKey();
-                System.out.println(notificationType + " equals " + notificationType.equals("NewMessage")) ;
                 if(notificationType.equals("NewMessage")){
 
                     Integer chatId = Integer.valueOf(theNotification.getValue(Integer.class));
 
-                    if(getRoot(navController).equals("chats/{userId}")){
-
-                        System.out.println("HEYYY EQUAL");
-                        System.out.println("arg " + getArg(navController));
-
-                        navController.navigate("chats/"+getArg(navController));
+                    if(NavigatorModel.getRoot().equals("chats/{userId}")){
+                            NavigatorModel.showChatWithId(NavigatorModel.getArg());
                     }
-
-                    System.out.println("Sorry not equal " + getRoot(navController));
-                    //  navController.navigate(getRoot(navController));
                 }
             }
 

@@ -1,13 +1,11 @@
 package com.example.firstprojecttry
 
-import android.content.Intent
+import ExecutorCard
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.navigation.NavController
@@ -18,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.example.firstprojecttry.GoogleMap.ShowMap
 import com.example.firstprojecttry.Logic.Executor
 import com.example.firstprojecttry.Logic.UtilityClass
 import com.example.firstprojecttry.Login.AuthModel
@@ -29,16 +28,23 @@ import com.example.firstprojecttry.Login.ForgotPasswordScreen
 import com.example.firstprojecttry.Login.GreetingScreen
 import com.example.firstprojecttry.Login.LoginScreen
 import com.example.firstprojecttry.Login.SignUpScreen
-import com.facebook.FacebookSdk
-import com.facebook.appevents.AppEventsLogger
+import com.example.firstprojecttry.Messenger.Messenger
+import com.example.firstprojecttry.Messenger.ShowChatScreen
+import com.example.firstprojecttry.Messenger.ShowChats
+import com.example.firstprojecttry.Messenger.demonstrate
+import com.example.firstprojecttry.Navigator.NavigatorModel
+import com.example.firstprojecttry.Notifications.Notifications
+import com.example.firstprojecttry.Profile.PreviewProfilePage
+import com.example.firstprojecttry.Profile.ProfileViewModel
+import com.example.firstprojecttry.Upload.uploadModel
+import com.example.firstprojecttry.helperActivities.ErrorScreen
+import com.example.firstprojecttry.helperActivities.LoadingBlock
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-// Initialize the Facebook SDK
-// Enable auto logging of app events
         val locationPermissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
@@ -59,8 +65,7 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             val navController = rememberNavController()
-            AuthViewModel.navController = navController;
-            ProfileViewModel.navController = navController;
+            NavigatorModel.navController = navController;
             MyApp(navController)
             AuthModel.startApplication()
         }
@@ -72,8 +77,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyApp(navController: NavHostController) {
 
-    Notifications.setController(navController)
-    uploadModel.setNavigation(navController)
     uploadModel()
     UtilityClass()
     NavHost(navController, startDestination = "loading") {
@@ -84,7 +87,6 @@ fun MyApp(navController: NavHostController) {
             LoadingBlock()
         }
         composable("demontt"){
-            //   Thread.sleep(10000)
             demonstrate()
         }
 
@@ -99,18 +101,12 @@ fun MyApp(navController: NavHostController) {
                 SignUpScreen()
             }
             composable("forgotPassword"){
-                //   Thread.sleep(10000)
                 ForgotPasswordScreen()
             }
 
         }
         navigation(startDestination = "profile", route = "loggedApp") {
             composable("profile") {
-
-
-                //uploadModel.loadedResources.waitUntilLoaded();
-
-                //demonstrate()
                 PreviewProfilePage()
             }
 
@@ -157,17 +153,8 @@ fun MyApp(navController: NavHostController) {
                     AuthModel.getCurrentUser().id,
                     userId
                 ), viewer = AuthModel.getCurrentUser().id, goBackFun = {
-                    System.out.println("FUNCTION GOING BACK")
                     navController.navigate("chat")
                 })
         }
     }
-}
-fun getRoot(navCont : NavController) : String?{
-    return navCont.previousBackStackEntry?.destination?.route
-}
-
-
-fun getArg(navCont : NavController) : Int?{
-    return navCont.currentBackStackEntry?.arguments?.getInt("userId")
 }

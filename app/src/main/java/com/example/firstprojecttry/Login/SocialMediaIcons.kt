@@ -8,14 +8,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.example.firstprojecttry.R
 
 @Composable
@@ -43,16 +41,6 @@ fun SocialMediaIcons(
                 contentDescription = "Go back from edit profile",
             )
         }
-        IconButton(
-            onClick = {
-                launcher.launch(Intent(context, FacebookLoginActivity::class.java))
-            },
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.facebook_logo),
-                modifier = Modifier.size(size),
-                contentDescription = "Go back from edit profile",
-            )
-        }
+
     }
 }

@@ -1,24 +1,23 @@
-package com.example.firstprojecttry;
-import com.google.firebase.firestore.auth.User;
+package com.example.firstprojecttry.Messenger;
+import com.example.firstprojecttry.Logic.FeedContainer;
+import com.example.firstprojecttry.Upload.uploadModel;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class Messenger {
-    static FeedContainer<Chat> Chats = new FeedContainer<>();
+    public static FeedContainer<Chat> Chats = new FeedContainer<>();
     static FeedContainer<ArrayList<Integer>> chatMessages = new FeedContainer<>();
 
-    static FeedContainer<ArrayList<Integer>> userChat = new FeedContainer<>();
+    public static FeedContainer<ArrayList<Integer>> userChat = new FeedContainer<>();
 
     static Map<Integer,Integer> lastMessageId = new HashMap<Integer , Integer >();
     static Integer getNextMessageId(Integer chatId)  {
 
         Chat chat = Chats.get(chatId);
         assert(chat != null);
-        System.out.println("getNextMessageId " + chat.getMessages().size());
         return chat.getMessages().size();
     }
     public static Chat startCommunication(Integer userA, Integer userB){
@@ -147,7 +146,6 @@ public class Messenger {
         }
         public Integer getOpposite(Integer x) throws Exception{
             if(!x.equals(A) && !x.equals(B)) {
-               // System.out.println("Chat: " + getId() + " A: " + A + " B: " + B + " X: " + x);
                 throw new Exception("Tried to get Opposite of a user that is not in the chat");
             }
             return (x == A) ? B : A;

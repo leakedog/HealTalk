@@ -1,6 +1,5 @@
 package com.example.firstprojecttry.Logic;
 
-import com.example.firstprojecttry.Logic.DescriptionCharacteristicField;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,7 +77,6 @@ public class UtilityClass {
             Executor e = new Executor();
             Client c = new Client();
 
-            System.out.println(Arrays.toString(c.getClass().getDeclaredFields()));
             for (String name : descriptionNames) {
                 if (DescriptionCharacteristicField.getField(name, e) != null) {
                     executorDescriptionNames.add(name);
@@ -87,15 +85,11 @@ public class UtilityClass {
                     clientDescriptionNames.add(name);
                 }
             }
-            System.out.println("FFF");
-            System.out.println(clientDescriptionNames);
-            System.out.println(descriptionNames);
+
             for (var x : descriptionMap.entrySet()) {
                 try {
                     Field field = DescriptionCharacteristicField.getField(x.getKey(), e);
                     field.setAccessible(true);
-
-                    System.out.println("UploadExecutor fieldName "  + x.getKey() +  ": " + field.getName()  + " " + DescriptionCharacteristicField.getObject(x.getKey(), e));
                 }catch (Exception er) {
                     System.out.println("ERROR " + er.getMessage());
                 }

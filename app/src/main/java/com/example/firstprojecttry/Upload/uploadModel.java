@@ -1,20 +1,24 @@
-package com.example.firstprojecttry;
+package com.example.firstprojecttry.Upload;
 
 import static android.content.ContentValues.TAG;
-
 import static com.example.firstprojecttry.Logic.Rating.calculate;
-import static com.example.firstprojecttry.Messenger.Chats;
-import static com.example.firstprojecttry.Messenger.userChat;
-
+import static com.example.firstprojecttry.Messenger.Messenger.Chats;
+import static com.example.firstprojecttry.Messenger.Messenger.userChat;
 import static java.lang.Thread.currentThread;
-import static java.lang.Thread.sleep;
 
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.navigation.NavController;
 
+import com.example.firstprojecttry.Logic.Client;
+import com.example.firstprojecttry.Logic.Executor;
+import com.example.firstprojecttry.Logic.Order;
+import com.example.firstprojecttry.Logic.PublicKey;
+import com.example.firstprojecttry.Logic.User;
 import com.example.firstprojecttry.Login.AuthViewModel;
+import com.example.firstprojecttry.Messenger.Messenger;
+import com.example.firstprojecttry.Notifications.NotificationSender;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -25,7 +29,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
-import com.example.firstprojecttry.Logic.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +36,6 @@ import java.util.Map;
 import java.util.Objects;
 
 public class uploadModel {
-    public static NavController navController = null;
     public static DatabaseReference mDatabase;
     public static DatabaseReference clientsBase;
     public static DatabaseReference executorsBase;
@@ -85,9 +87,6 @@ public class uploadModel {
         AuthViewModel.reactLoaded();
     }
 
-    public static void setNavigation(NavController nav){
-        navController = nav;
-    }
     public static LoadWait loadedResources = new LoadWait();
     public static FirebaseAuth mAuth = null;
     //TODO to find myself probably make another database, which will hold key = id, value = token, when I import database, just make map(token, id).
@@ -122,14 +121,13 @@ public class uploadModel {
     protected static void addExecutor(Executor person) {
         mDatabase.child("users").child("executors").child("E"+person.getId().toString()).setValue(person).addOnCompleteListener(insertionReaction("Executor")).addOnFailureListener(failureReaction("Executor"));
     }
-    protected static void addChat(Messenger.Chat chat){
+    public static void addChat(Messenger.Chat chat){
         // System.out.println("TRHOW MY FUNCTION");
         mDatabase.child("users").child("userChat").child(chat.getA().toString()).child(chat.getId().toString()).setValue(chat.getId().toString()).addOnCompleteListener(insertionReaction("chat")).addOnFailureListener(failureReaction("chat"));
         mDatabase.child("users").child("userChat").child(chat.getB().toString()).child(chat.getId().toString()).setValue(chat.getId().toString()).addOnCompleteListener(insertionReaction("chat")).addOnFailureListener(failureReaction("chat"));
         mDatabase.child("chat").child(chat.getId().toString()).child("chatInfo").setValue((Messenger.ChatInfo)chat);
     }
-    protected static void addMessage(Integer chatId, Messenger.Message message){
-        System.out.println("ADD MESSAGE BY ME");
+    public static void addMessage(Integer chatId, Messenger.Message message){
         assert(chatId != null);
         assert(message.getId() != null);
         mDatabase.child("chat").child(chatId.toString()).child("messages").child(message.getId().toString()).setValue(message).addOnCompleteListener(insertionReaction("messagechat")).addOnFailureListener(failureReaction("messagechat"));
@@ -138,7 +136,7 @@ public class uploadModel {
         mDatabase.child("orders").child(order.getId().toString()).setValue(order).addOnCompleteListener(insertionReaction("Order")).addOnFailureListener(failureReaction("Order"));
     }
     // load values from Client database and react for every change
-    protected static void addPublicKey(String token, Integer publicCode){
+    public static void addPublicKey(String token, Integer publicCode){
         mDatabase.child("users").child("publicKeys").child(publicCode.toString()).setValue(token);
     }
     static ValueEventListener producePublicKeyEventListener(){
@@ -146,6 +144,7 @@ public class uploadModel {
 
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                System.out.println("ThreadName + " + currentThread().getName());
 
                 try {
 
@@ -176,8 +175,8 @@ public class uploadModel {
 
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                System.out.println("ThreaName + " + currentThread().getName());
-                System.out.println("ONDATACHANGE");
+                System.out.println("ThreadName + " + currentThread().getName());
+
                 Map<String, Client> list = snapshot.getValue(new GenericTypeIndicator<HashMap<String,Client>>() {
                     @Override
                     public int hashCode() {
@@ -187,7 +186,6 @@ public class uploadModel {
                 try {
                     for (Map.Entry<String, Client> pairClient : list.entrySet()) {
                         var client = pairClient.getValue();
-                        System.out.println("Found client " + client);
                         Client.container.update(client.getId(), client);
                         User.getContainer().update(client.getId(), client);
                     }
@@ -212,6 +210,7 @@ public class uploadModel {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 System.out.println("ThreadName + " + currentThread().getName());
+
                 Map<String, Executor> list = snapshot.getValue(new GenericTypeIndicator<HashMap<String,Executor>>() {
                     @Override
                     public int hashCode() {
@@ -221,7 +220,6 @@ public class uploadModel {
                 try{
                     for (Map.Entry<String, Executor> executor : list.entrySet())
                     {
-                        System.out.println("Found client " + executor.getValue().getName() + " hah " + executor.getValue().getPhoto().getPhotoURL() + executor.getValue().getId().toString());
                         Executor.container.update(executor.getValue().getId(), executor.getValue());
                         User.getContainer().update(executor.getValue().getId(), executor.getValue());
                     }
@@ -246,7 +244,8 @@ public class uploadModel {
         return new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                System.out.println("ThreaName + " + currentThread().getName());
+                System.out.println("ThreadName + " + currentThread().getName());
+
                 Map<String, Order> list = snapshot.getValue(new GenericTypeIndicator<HashMap<String,Order>>() {
                     @Override
                     public int hashCode() {
@@ -282,7 +281,7 @@ public class uploadModel {
         return new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                System.out.println("ThreaName + " + currentThread().getName());
+                System.out.println("ThreadName + " + currentThread().getName());
                 try {
 
 
@@ -356,6 +355,8 @@ public class uploadModel {
         return new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                System.out.println("ThreadName + " + currentThread().getName());
+
                 if(!snapshot.exists()){
                     loadedResources.update(4);
                     return;
@@ -367,13 +368,9 @@ public class uploadModel {
                         if(singleChat.exists())
                             chats.add(Integer.valueOf(singleChat.getValue(String.class)));
                     }
-                    System.out.println("For a user " + userId);
-                    for(Integer x : chats){
-                        System.out.print(x + " ");
-                    }
+
                     userChat.update(userId, chats);
                 }
-                System.out.println("We LOADED USER CHAT");
                 loadedResources.update(4);
             }
             @Override

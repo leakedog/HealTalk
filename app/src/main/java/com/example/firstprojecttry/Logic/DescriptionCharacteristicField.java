@@ -3,7 +3,6 @@ package com.example.firstprojecttry.Logic;
 import static com.example.firstprojecttry.Logic.UtilityClass.classToCheckList;
 
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Objects;
 
 public class DescriptionCharacteristicField{

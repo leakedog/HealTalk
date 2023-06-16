@@ -1,55 +1,73 @@
-package com.example.firstprojecttry;
+package com.example.firstprojecttry.Profile;
 
 import static com.example.firstprojecttry.Logic.UtilityClass.descriptionMap;
 import static com.example.firstprojecttry.Logic.UtilityClass.descriptionStates;
-
-
 import android.net.Uri;
-import android.util.Log;
-
+import androidx.annotation.NonNull;
 import androidx.compose.runtime.MutableState;
-import androidx.navigation.NavController;
-
 import com.example.firstprojecttry.Logic.Client;
 import com.example.firstprojecttry.Logic.DescriptionCharacteristicField;
 import com.example.firstprojecttry.Logic.Executor;
 import com.example.firstprojecttry.Logic.User;
+import com.example.firstprojecttry.Logic.UserType;
 import com.example.firstprojecttry.Login.AuthModel;
 import com.example.firstprojecttry.Login.AuthViewModel;
-
-import org.jetbrains.annotations.NotNull;
-
+import com.example.firstprojecttry.Logic.PublicKey;
+import com.example.firstprojecttry.Upload.uploadModel;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import java.lang.reflect.Field;
+import java.util.UUID;
 
-public class ProfileViewModel {
-    public static NavController navController = null;
+public class ProfileModel {
 
-    public static void tryUploadImage(MutableState<String> photoURL, MutableState<Uri> imageUriState) {
-        ProfileModel.uploadImage(photoURL, imageUriState);
+    private static FirebaseStorage storage = FirebaseStorage.getInstance();
+    private static StorageReference storageRef = storage.getReference();
+
+    public static void uploadImage(MutableState<String> photoURL, MutableState<Uri> imageUriState) {
+        Uri fileUri = imageUriState.getValue();
+        StorageReference randomRef = storageRef.child("images").child(UUID.randomUUID().toString());
+        UploadTask uploadTask = randomRef.putFile(fileUri);
+        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // Handle upload success
+                randomRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri downloadUri) {
+                        String imageUrl = downloadUri.toString();
+                        ProfileViewModel.onSuccessImageLoad(photoURL, imageUrl);
+                    }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                // Handle upload failure
+                ProfileViewModel.onFailureImageLoad(photoURL);
+
+
+            }
+        });
+
     }
-    public static void onSuccessImageLoad(MutableState<String> photoURL, String imageURL) {
-        System.out.println("LOL " + imageURL);
-        photoURL.setValue(imageURL);
-    }
 
-    public static void onFailureImageLoad(MutableState<String> executor) {
-        navController.navigate("errorImage");
-    }
-
-    public static void handleComeBackFromError() {
-        navController.navigate("profile");
-    }
-
-    public static void uploadUser() throws InterruptedException {
+    public static void uploadUser()  {
         if (AuthModel.token == null) {
             AuthViewModel.isWaiting = true;
             AuthViewModel.loadToken();
         }
         while (AuthModel.token == null) {
-            Thread.sleep(100);
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+
+            }
         }
         var user = AuthModel.getCurrentUser();
-        System.out.println(descriptionStates);
         for (var x : descriptionStates.entrySet()) {
             if (x.getValue() == null) continue;
             try {
@@ -60,26 +78,15 @@ public class ProfileViewModel {
                 if (hisClass == Integer.class) {
                     value = Integer.valueOf((String) value);
                 }
-                System.out.println(field.getName() + " = " + value);
                 field.set(DescriptionCharacteristicField.getObject(x.getKey(), user), hisClass.cast(value));
             }catch (Exception e) {
                 System.out.println("ERROR " + e.getMessage() + " " + "WWW ? " + x.getKey());
             }
         }
-        for (var x : descriptionMap.entrySet()) {
-            try {
-                Field field = DescriptionCharacteristicField.getField(x.getKey(), user);
-                field.setAccessible(true);
-
-                System.out.println("UploadExecutor fieldName "  + x.getKey() +  ": " + field.get(DescriptionCharacteristicField.getObject(x.getKey(), user)));
-            }catch (Exception e) {
-                System.out.println("ERROR " + e.getMessage() + " " + x.getKey());
-            }
-        }
         uploadModel.addUser(user);
     }
 
-    public static void firstUploadUser(Integer Type) throws InterruptedException {
+    public static void firstUploadUser(UserType type) {
         // Type == 0 Client, otherwise User
         User user;
         if (AuthModel.token == null || AuthModel.token.equals("")) {
@@ -87,20 +94,21 @@ public class ProfileViewModel {
             AuthViewModel.loadToken();
         }
         while (AuthModel.token == null || AuthModel.token.equals("")) {
-            Thread.sleep(100);
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+
+            }
         }
-        if (Type == 0) {
+        if (type == UserType.CLIENT) {
             user = new Client();
         } else {
             user = new Executor();
         }
-        System.out.println("TOKEN: " + AuthModel.token);
         user.setToken(AuthModel.token);
-        System.out.println("TOKEN + ID: " + user.getToken() + " "  + user.getId());
         PublicKey.update(user.getToken(), user.getId());
         uploadModel.addPublicKey(user.getToken(), user.getId());
 
-        System.out.println("descriptionStates Upload: " + descriptionStates);
 
         for (var x : descriptionStates.entrySet()) {
             try {
@@ -116,32 +124,14 @@ public class ProfileViewModel {
                 System.out.println("ERROR " + e.getMessage() + " descriptionStates " + x.getKey() + " " + x.getValue().getClass());
             }
         }
-        for (var x : descriptionMap.entrySet()) {
-            try {
-                Field field = DescriptionCharacteristicField.getField(x.getKey(), user);
-                field.setAccessible(true);
-                System.out.println("UploadExecutor fieldName "  + x.getKey() +  ": " + field.get(DescriptionCharacteristicField.getObject(x.getKey(), user)));
-            }catch (Exception e) {
-                System.out.println("ERROR " + e.getMessage() + " descriptionMap " + x.getKey());
-            }
-        }
+
         User.container.update(user.getId(), user);
-        if (Type == 0) {
+        if (type == UserType.CLIENT) {
             Client.container.update(user.getId(), (Client) user);
         } else {
             Executor.container.update(user.getId(), (Executor) user);
         }
         uploadModel.addUser(user);
         AuthViewModel.startLogged();
-    }
-    public static void showExecutor(@NotNull Executor executor){
-        navController.navigate("executors/" + executor.getId());
-    }
-    public static void showExecutorFromChat(@NotNull Executor executor){
-        navController.navigate("executorsFromChat/" + executor.getId());
-    }
-
-    public static void showChatWith(@NotNull Executor value) {
-        navController.navigate("chats/" + value.getId());
     }
 }

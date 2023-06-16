@@ -6,13 +6,12 @@
     <string name="title_activity_bottom_bar_activity.kt">BottomBarActivity.kt</string>
     <string name="title_activity_bottom_bar">bottomBarActivity</string>
     <string name="title_activity_login">LoginActivity</string>
-    <string name="default_web_client_idd" />
     <string name="title_activity_google_activity.kt">GoogleActivity.kt</string>
     <string name="title_activity_google">GoogleActivity</string>
 
-    <string name="facebook_app_id">115077694929650</string>
-    <string name="fb_login_protocol_scheme">fb115077694929650</string>
-    <string name="facebook_client_token">d46ad026b3a6c90cd3eb1119086b65e0</string>
+    <string name="facebook_app_id">104434962693719</string>
+    <string name="fb_login_protocol_scheme">fb104434962693719</string>
+    <string name="facebook_client_token">27adb0824ee1b7321c498e77e87e1b63</string>
 
 
 </resources>

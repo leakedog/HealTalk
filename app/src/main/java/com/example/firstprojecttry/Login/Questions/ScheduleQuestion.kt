@@ -5,7 +5,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.example.firstprojecttry.Logic.Schedule
-import com.example.firstprojecttry.ScheduleGrid
+import com.example.firstprojecttry.Profile.ScheduleGrid
 
 @Composable
 fun ScheduleQuestion(

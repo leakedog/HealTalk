@@ -1,16 +1,15 @@
-package com.example.firstprojecttry;
+package com.example.firstprojecttry.Logic;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 public class FeedContainer <T> {
-    Map<Integer, T> container;
+    public Map<Integer, T> container;
     public FeedContainer() {
         container = new HashMap<>();
     }
     public void update(int id, T value) {
-        System.out.println("Copied successfully!");
         container.put(id, value);
     }
     public Integer getSize() {

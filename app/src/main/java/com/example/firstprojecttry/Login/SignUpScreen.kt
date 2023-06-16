@@ -1,15 +1,7 @@
 package com.example.firstprojecttry.Login
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,18 +27,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat.startActivity
-import androidx.core.app.ActivityCompat.startActivityForResult
-import androidx.test.core.app.ApplicationProvider.getApplicationContext
-import com.example.firstprojecttry.MainActivity
-import com.example.firstprojecttry.R
 
 
 @Composable

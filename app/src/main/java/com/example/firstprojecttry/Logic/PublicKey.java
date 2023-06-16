@@ -1,4 +1,4 @@
-package com.example.firstprojecttry;
+package com.example.firstprojecttry.Logic;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +13,7 @@ public class PublicKey {
     }
 
     static Map<String, Integer> keys = new HashMap<String, Integer>();
-    static void update(String token, Integer publicId){
+    public static void update(String token, Integer publicId){
         keys.put(token, publicId);
     }
     public static Integer getPublicId(String token){

@@ -1,7 +1,5 @@
 package com.example.firstprojecttry.Logic;
 
-import com.example.firstprojecttry.FeedContainer;
-
 import java.text.DateFormat;
 
 public class Order implements CopyCat<Order> {

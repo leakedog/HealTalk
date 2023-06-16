@@ -1,6 +1,5 @@
 package com.example.firstprojecttry.Login
 
-import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -11,10 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.firstprojecttry.Navigator.NavigatorModel
 import com.example.firstprojecttry.R
 
 @Preview
@@ -66,17 +63,17 @@ fun GreetingScreen() {
         ) {
             Button(
                 onClick = {
-                    AuthViewModel.navController.navigate("login")
+                    NavigatorModel.showLogin()
                 },
             ) {
-                Text("Login", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold);
+                Text("Login", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
             }
             Button(
                 onClick = {
-                    AuthViewModel.navController.navigate("registration")
+                    NavigatorModel.showRegistration()
                 },
             ) {
-                Text("Sign Up", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold);
+                Text("Sign Up", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
             }
         }
         Text("Or via social media", style = MaterialTheme.typography.labelLarge, color = Color.DarkGray)

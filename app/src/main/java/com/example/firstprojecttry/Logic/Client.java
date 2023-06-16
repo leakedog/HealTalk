@@ -2,8 +2,6 @@ package com.example.firstprojecttry.Logic;
 
 import static com.example.firstprojecttry.Logic.Rating.calculate;
 
-import com.example.firstprojecttry.FeedContainer;
-
 
 public class Client extends User implements CopyCat<Client> {
     public static FeedContainer<Client> container = new FeedContainer<Client>();
@@ -52,20 +50,8 @@ public class Client extends User implements CopyCat<Client> {
     }
 
 
-    public void setId(int id) {
-        this.id = id;
-    }
-    public Integer getId() {
-        return id;
-    }
 
-    public String getName(){return this.name;}
-    public void setName(String s){this.name = s;}
 
-    public Description getDescription() {
-        return description;
-    }
-    public void setDescription(Description description) {this.description = description;}
 
 
     public Side getPreferredSide() {

@@ -2,8 +2,6 @@ package com.example.firstprojecttry.Logic;
 
 import static com.example.firstprojecttry.Logic.Rating.calculate;
 
-import com.example.firstprojecttry.FeedContainer;
-
 public class Executor extends User implements CopyCat<Executor> {
     public static FeedContainer<Executor> container = new FeedContainer<>();
     private Schedule schedule;
@@ -19,7 +17,6 @@ public class Executor extends User implements CopyCat<Executor> {
         rating = calculate(this);
         id = getNextUserId();
         container.update(id, this);
-        System.out.println(this);
         schedule = new Schedule();
     }
 
@@ -36,7 +33,6 @@ public class Executor extends User implements CopyCat<Executor> {
         this.rating = calculate(this);
         this.token = token;
         container.update(this.id, this);
-        System.out.println(description);
     }
     public Executor(Integer id, String name, Description description, Schedule schedule,
                     Integer price, Photo photo, Side preferredSide, Location location) {
@@ -50,7 +46,6 @@ public class Executor extends User implements CopyCat<Executor> {
         this.location = location;
         this.rating = calculate(this);
         container.update(this.id, this);
-        System.out.println(description);
     }
 
     @Override
@@ -67,20 +62,8 @@ public class Executor extends User implements CopyCat<Executor> {
 
 
 
-    public void setId(int id) {
-        this.id = id;
-    }
-    public Integer getId() {
-        return id;
-    }
 
-    public String getName(){return this.name;}
-    public void setName(String s){this.name = s;}
 
-    public Description getDescription() {
-        return description;
-    }
-    public void setDescription(Description description) {this.description = description;}
     public void setSchedule(Schedule schedule) {
         this.schedule = schedule;
     }

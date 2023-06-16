@@ -9,15 +9,12 @@ import androidx.annotation.NonNull;
 import androidx.compose.runtime.MutableState;
 
 import com.example.firstprojecttry.Logic.User;
-import com.example.firstprojecttry.Login.AuthViewModel;
-import com.example.firstprojecttry.PublicKey;
+import com.example.firstprojecttry.Logic.PublicKey;
+import com.example.firstprojecttry.Navigator.NavigatorModel;
 import com.google.android.gms.auth.api.identity.BeginSignInRequest;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.EmailAuthCredential;
-import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -103,15 +100,10 @@ public class AuthModel {
     }
     // Method to retrieve the user's token
     public static void getCurrentUserToken(MutableState<Boolean> error) {
-        System.out.println("getCurrentUserToken");
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
-            System.out.println("Waiting");
             token = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
             AuthViewModel.handleToken();
-        } else {
-            System.out.println("Error");
-
         }
     }
     public static void startApplication() {
@@ -119,15 +111,14 @@ public class AuthModel {
             AuthViewModel.isWaiting = true;
             AuthViewModel.isWaitingLoading = true;
             getCurrentUserToken(null);
-            AuthViewModel.showLoading();
+            NavigatorModel.showLoading();
         } else {
-            AuthViewModel.showGreeting();
+            NavigatorModel.showGreeting();
         }
 
     }
 
     public static User getCurrentUser() {
-        System.out.println(PublicKey.getPublicId(token));
         if (PublicKey.getPublicId(token) == null) {
             logOut();
             AuthViewModel.handleError();

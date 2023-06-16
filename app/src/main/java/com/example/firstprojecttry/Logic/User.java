@@ -1,7 +1,5 @@
 package com.example.firstprojecttry.Logic;
 
-import com.example.firstprojecttry.FeedContainer;
-
 public class User{
 
     static private Integer lastUserId = 0;
@@ -17,10 +15,10 @@ public class User{
     protected int id;
 
     User() {
-        token = new String();
+        token = "";
         photo = new Photo();
         description = new Description();
-        name = new String();
+        name = "";
     }
     public static FeedContainer<User> getContainer() {
         return container;
@@ -48,7 +46,6 @@ public class User{
     }
     public void setToken(String token){
         this.token = token;
-        System.out.println("setToken");
     }
     public void setId(int id) {
         this.id = id;

@@ -31,10 +31,10 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.firstprojecttry.LoadImageFromUrlExample
+import com.example.firstprojecttry.Profile.LoadImageFromUrlExample
 import com.example.firstprojecttry.Logic.UtilityClass.descriptionMap
 import com.example.firstprojecttry.Logic.UtilityClass.descriptionStates
-import com.example.firstprojecttry.ProfileViewModel
+import com.example.firstprojecttry.Profile.ProfileViewModel
 import com.example.firstprojecttry.R
 
 
@@ -45,7 +45,6 @@ fun PhotoQuestion(
 ) {
     val field = descriptionMap[name]!!
     var photoURL = rememberSaveable { mutableStateOf("") }
-    println("PhotoQuestion recompose")
     descriptionStates[name] = photoURL.value
     var imageUriState = remember{ mutableStateOf<Uri?> (null) }
     val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
