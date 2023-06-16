@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.firstprojecttry.Logic.DescriptionCharacteristicField
 import com.example.firstprojecttry.Logic.DescriptionType
-import com.example.firstprojecttry.Profile.handleStringInput
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

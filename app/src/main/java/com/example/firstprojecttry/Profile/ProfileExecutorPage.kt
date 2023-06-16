@@ -43,6 +43,8 @@ import com.example.firstprojecttry.Logic.DescriptionType
 import com.example.firstprojecttry.Logic.Executor
 import com.example.firstprojecttry.Logic.UtilityClass
 import com.example.firstprojecttry.Profile.Components.AvailabilityBlock
+import com.example.firstprojecttry.Profile.Components.DescriptionItem
+import com.example.firstprojecttry.Profile.Components.LoadImageFromUrlExample
 import com.example.firstprojecttry.Profile.Components.LogOutButton
 import com.example.firstprojecttry.R
 

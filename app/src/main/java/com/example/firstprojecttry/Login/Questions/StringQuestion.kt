@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.example.firstprojecttry.Logic.DescriptionType
 import com.example.firstprojecttry.Logic.UtilityClass.descriptionMap
 import com.example.firstprojecttry.Logic.UtilityClass.descriptionStates
-import com.example.firstprojecttry.Profile.handleStringInput
+import com.example.firstprojecttry.Profile.Components.handleStringInput
 
 
 @Composable

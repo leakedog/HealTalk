@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import com.example.firstprojecttry.Logic.Executor
 import com.example.firstprojecttry.Logic.Schedule
 import com.example.firstprojecttry.Logic.UtilityClass
-import com.example.firstprojecttry.Profile.ScheduleGrid
 import com.example.firstprojecttry.R
 
 

@@ -32,7 +32,7 @@ import com.example.firstprojecttry.Logic.Photo
 import com.example.firstprojecttry.Messenger.UserMessageSide
 import com.example.firstprojecttry.Messenger.getHeight
 import com.example.firstprojecttry.Messenger.getWidth
-import com.example.firstprojecttry.Profile.LoadImageFromUrlExample
+import com.example.firstprojecttry.Profile.Components.LoadImageFromUrlExample
 import java.lang.Math.floor
 
 

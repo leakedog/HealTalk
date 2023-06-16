@@ -41,8 +41,9 @@ import com.example.firstprojecttry.Logic.DescriptionType
 import com.example.firstprojecttry.Logic.Executor
 import com.example.firstprojecttry.Logic.UtilityClass
 import com.example.firstprojecttry.Profile.Components.AvailabilityBlock
-import com.example.firstprojecttry.Profile.DescriptionItem
-import com.example.firstprojecttry.Profile.LoadImageFromUrlExample
+import com.example.firstprojecttry.Profile.Components.DescriptionItem
+import com.example.firstprojecttry.Profile.Components.LoadImageFromUrlExample
+
 import com.example.firstprojecttry.Profile.ProfileViewModel
 import com.example.firstprojecttry.R
 
@@ -161,6 +162,7 @@ fun ExecutorCard(executor: MutableState<Executor>, theme: MaterialTheme = Materi
                                 ?.toString(), changeable = false)
                             }
                         }
+
                     }
                 }
             )

@@ -60,7 +60,7 @@ import com.example.firstprojecttry.Messenger.Message.MessageModel.sendMessage
 import com.example.firstprojecttry.Messenger.Message.messageBackView
 import com.example.firstprojecttry.Messenger.Message.messageFont
 import com.example.firstprojecttry.Navigator.NavigatorViewModel
-import com.example.firstprojecttry.Profile.LoadImageFromUrlExample
+import com.example.firstprojecttry.Profile.Components.LoadImageFromUrlExample
 import com.example.firstprojecttry.Profile.ProfileViewModel
 import com.example.firstprojecttry.R
 import com.example.firstprojecttry.helperActivities.BottomBar
