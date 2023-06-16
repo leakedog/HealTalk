@@ -64,7 +64,14 @@ android {
 }
 
 dependencies {
+    // ktor
+    implementation "io.ktor:ktor-client-core:1.6.5"
+    implementation "io.ktor:ktor-client-android:1.6.5"
+    implementation "io.ktor:ktor-client-serialization:1.6.5"
+
+
     implementation 'com.facebook.android:facebook-android-sdk:14.1.0'
+    implementation("com.google.accompanist:accompanist-permissions:0.31.1-alpha")
 
 
     implementation 'com.github.bumptech.glide:glide:4.14.2'

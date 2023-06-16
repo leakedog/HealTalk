@@ -131,6 +131,8 @@ fun ExecutorCard(executor: MutableState<Executor>, theme: MaterialTheme = Materi
                             modifier = Modifier
                                 .size(150.dp)
                                 .align(Alignment.Start)
+                                .background(Color.LightGray)
+
 
                         )
                     }
@@ -155,9 +157,18 @@ fun ExecutorCard(executor: MutableState<Executor>, theme: MaterialTheme = Materi
                     ) {
                         for (name in listNames) {
                             val type = UtilityClass.descriptionMap[name]!!.type
+                            if (name == "price"
+                            ) {    DescriptionItem(title = UtilityClass.descriptionMap[name]!!.descriptionTitle, name = name, fieldValue = DescriptionCharacteristicField.getFieldValue(name, executor.value)
+                                ?.toString(), changeable = false)
+                            }
+                        }
+                        for (name in listNames) {
+                            val type = UtilityClass.descriptionMap[name]!!.type
                             if (type in arrayListOf(
                                     DescriptionType.NUMBER, DescriptionType.STRING,
-                                    DescriptionType.DATE, DescriptionType.CHECKBOX)
+                                    DescriptionType.DATE, DescriptionType.CHECKBOX) &&
+                                        name != "price"
+
                             ) {    DescriptionItem(title = UtilityClass.descriptionMap[name]!!.descriptionTitle, name = name, fieldValue = DescriptionCharacteristicField.getFieldValue(name, executor.value)
                                 ?.toString(), changeable = false)
                             }

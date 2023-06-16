@@ -21,7 +21,7 @@ import java.util.Date
 
 
 @Composable
-fun DescriptionItem(title: String, name: String, fieldValue: String?, last: Boolean = false, changeable: Boolean = true, showBorder: Boolean = false) {
+fun DescriptionItem(title: String, name: String, fieldValue: String?, last: Boolean = false, changeable: Boolean = true) {
     var textValue = "";
     var type = UtilityClass.descriptionMap[name]!!.type
 

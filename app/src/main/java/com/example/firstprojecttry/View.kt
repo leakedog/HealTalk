@@ -8,7 +8,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -20,7 +19,6 @@ import com.example.firstprojecttry.GoogleMap.ShowMap
 import com.example.firstprojecttry.Logic.Executor
 import com.example.firstprojecttry.Logic.UtilityClass
 import com.example.firstprojecttry.Login.AuthModel
-import com.example.firstprojecttry.Login.AuthViewModel
 import com.example.firstprojecttry.Login.ChooseTypePage
 import com.example.firstprojecttry.Login.ClientQuestionPage
 import com.example.firstprojecttry.Login.ExecutorQuestionPage
@@ -33,13 +31,10 @@ import com.example.firstprojecttry.Messenger.ShowChatScreen
 import com.example.firstprojecttry.Messenger.ShowChats
 import com.example.firstprojecttry.Messenger.demonstrate
 import com.example.firstprojecttry.Navigator.NavigatorModel
-import com.example.firstprojecttry.Notifications.Notifications
 import com.example.firstprojecttry.Profile.PreviewProfilePage
-import com.example.firstprojecttry.Profile.ProfileViewModel
 import com.example.firstprojecttry.Upload.uploadModel
 import com.example.firstprojecttry.helperActivities.ErrorScreen
 import com.example.firstprojecttry.helperActivities.LoadingBlock
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -156,5 +151,7 @@ fun MyApp(navController: NavHostController) {
                     navController.navigate("chat")
                 })
         }
+
     }
 }
+
