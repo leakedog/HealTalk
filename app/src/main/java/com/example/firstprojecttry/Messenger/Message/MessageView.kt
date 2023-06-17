@@ -29,10 +29,10 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.firstprojecttry.Logic.Photo
-import com.example.firstprojecttry.Messenger.UserMessageSide
-import com.example.firstprojecttry.Messenger.getHeight
-import com.example.firstprojecttry.Messenger.getWidth
 import com.example.firstprojecttry.Profile.Components.LoadImageFromUrlExample
+import com.example.firstprojecttry.UserMessageSide
+import com.example.firstprojecttry.getHeight
+import com.example.firstprojecttry.getWidth
 import java.lang.Math.floor
 
 
@@ -61,86 +61,70 @@ fun messageLength(text : String, lineHeight: TextUnit) : Dp{
 @Composable
 fun DisplayMessage(text : String, side : UserMessageSide, photo : Photo){
 
-
+    val bottomHeight = 100.dp
+    val textPadding = 5.dp
+    val messageCircleBorder = 10.dp
+    val marginAboveMessage = 5.dp
+    val widthBetweenImage = 8.dp
     val messageLen : Dp = messageLength(text, messageFont.fontSize)
-
     val photoMod = Modifier
         .size(40.dp)
         .clip(CircleShape)
+
+
     if(side == UserMessageSide.RECEIVER){
         Row(
             modifier = Modifier
                 .padding(start = 0.dp, top = 0.dp, end = 0.dp, bottom = 0.dp).fillMaxWidth(),
             horizontalArrangement = Arrangement.Start
         ) {
-             Spacer(modifier = Modifier.width(8.dp))
+             Spacer(modifier = Modifier.width(widthBetweenImage))
              LoadImageFromUrlExample(
                 imageUrl = photo.getPhotoURL(),
                 modifier = photoMod
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column(modifier = Modifier.width((getWidth() - 100).dp), horizontalAlignment = Alignment.Start) {
-                Spacer(Modifier.height(5.dp))
+            Spacer(modifier = Modifier.width(widthBetweenImage))
+            Column(modifier = Modifier.width(getWidth().dp - bottomHeight), horizontalAlignment = Alignment.Start) {
+                Spacer(Modifier.height(marginAboveMessage))
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp, 10.dp, 10.dp, 10.dp))
+                        .clip(RoundedCornerShape(messageCircleBorder, messageCircleBorder, messageCircleBorder, messageCircleBorder))
                         .background(color = messageBackOpp)
                 ) {
                     Text(
                         text = text,
                         style = messageFont,
-                        modifier = Modifier.padding(5.dp, 5.dp, 5.dp, 5.dp),
+                        modifier = Modifier.padding(textPadding, textPadding, textPadding, textPadding),
                     );
                 }
             }
-
-
         }
     }else{
 
             Row(
-                modifier = Modifier
-                    .padding(start = 0.dp, top = 0.dp, end = 0.dp, bottom = 0.dp).fillMaxWidth(),
+                modifier = Modifier.padding(start = 0.dp, top = 0.dp, end = 0.dp, bottom = 0.dp).fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                Column(modifier = Modifier.width((getWidth() - 100).dp), horizontalAlignment = Alignment.End) {
-                    Spacer(Modifier.height(5.dp))
+                Column(modifier = Modifier.width(getWidth().dp - bottomHeight), horizontalAlignment = Alignment.End) {
+                    Spacer(Modifier.height(marginAboveMessage))
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp, 10.dp, 10.dp, 10.dp))
+                            .clip(RoundedCornerShape(messageCircleBorder, messageCircleBorder, messageCircleBorder, messageCircleBorder))
                             .background(color = messageBackView)
                     ) {
                         Text(
                             text = text,
                             style = messageFont,
-                            modifier = Modifier.padding(5.dp, 5.dp, 5.dp, 5.dp),
+                            modifier = Modifier.padding(textPadding, textPadding, textPadding, textPadding),
                         );
                     }
                 }
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(widthBetweenImage))
                 LoadImageFromUrlExample(
                     imageUrl = photo.getPhotoURL(),
                     modifier = photoMod
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(widthBetweenImage))
             }
-
-    }
-
-}
-@Preview
-@Composable
-fun showHowLook() {
-    Column {
-        DisplayMessage(
-            "Hey",
-            UserMessageSide.RECEIVER,
-           Photo("https://stats.ioinformatics.org/img/photos/2022/7678.jpg")
-        )
-        DisplayMessage(
-            "Wassup",
-            UserMessageSide.SENDER,
-            Photo("https://media.licdn.com/dms/image/D4D03AQHu2ES2QbvZgg/profile-displayphoto-shrink_800_800/0/1666369413666?e=2147483647&v=beta&t=l6mqyt4ks3YTB4Uqrx_fFRzHtlpiSqc35TROjomRAI4")
-        )
     }
 }

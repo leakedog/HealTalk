@@ -27,9 +27,7 @@ import com.example.firstprojecttry.Login.GreetingScreen
 import com.example.firstprojecttry.Login.LoginScreen
 import com.example.firstprojecttry.Login.SignUpScreen
 import com.example.firstprojecttry.Messenger.Messenger
-import com.example.firstprojecttry.Messenger.ShowChatScreen
-import com.example.firstprojecttry.Messenger.ShowChats
-import com.example.firstprojecttry.Messenger.demonstrate
+
 import com.example.firstprojecttry.Navigator.NavigatorModel
 import com.example.firstprojecttry.Profile.PreviewProfilePage
 import com.example.firstprojecttry.Upload.uploadModel
@@ -144,10 +142,10 @@ fun MyApp(navController: NavHostController) {
             val backStackEntry = navController.currentBackStackEntry!!
             val userId = backStackEntry.arguments!!.getInt("userId")
             ShowChatScreen(
-                x = Messenger.startCommunication(
+                xid = Messenger.startCommunication(
                     AuthModel.getCurrentUser().id,
                     userId
-                ), viewer = AuthModel.getCurrentUser().id, goBackFun = {
+                ).getId(), viewer = AuthModel.getCurrentUser().id, goBackFun = {
                     navController.navigate("chat")
                 })
         }
