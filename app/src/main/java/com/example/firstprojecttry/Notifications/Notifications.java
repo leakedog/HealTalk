@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.navigation.NavController;
 
+import com.example.firstprojecttry.DisplayMessengerKt;
 import com.example.firstprojecttry.Navigator.NavigatorModel;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -40,7 +41,7 @@ public class Notifications {
                     Integer chatId = Integer.valueOf(theNotification.getValue(Integer.class));
 
                     if(NavigatorModel.getRoot().equals("chats/{userId}")){
-                            NavigatorModel.showChatWithId(NavigatorModel.getArg());
+                        DisplayMessengerKt.getRecomposeShowChatScreen().invoke();
                     }
                 }
             }

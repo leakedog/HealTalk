@@ -228,8 +228,8 @@ fun getFun(messages : List<Messenger.Message>?, viewer : Int){
     }
     val localDensity = LocalDensity.current
     val height = getHeight().dp
-    if(height - columnHeightDp >= 0.dp && columnHeightDp != 0.dp) {
-        Spacer(Modifier.fillMaxWidth().height(height - columnHeightDp - 10.dp))
+    if(height - columnHeightDp >= 10.dp && columnHeightDp != 0.dp) {
+        Spacer(Modifier.fillMaxWidth().height(height - columnHeightDp - 20.dp))
     }else{
         loaded = false
     }
@@ -239,8 +239,8 @@ fun getFun(messages : List<Messenger.Message>?, viewer : Int){
         verticalArrangement = Arrangement.spacedBy(8.dp),
         state = state,  modifier = Modifier.onSizeChanged {
             val newVal = with(localDensity) { it.height.toDp() }
-            if(height - newVal >= 0.dp) {
-                columnHeightDp = newVal;
+            if(height - newVal >= 20.dp) {
+               // columnHeightDp = newVal;
             }
         }
     ) {
